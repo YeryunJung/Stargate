@@ -6,6 +6,7 @@ import com.ssafy.stargate.model.entity.PUser;
 import com.ssafy.stargate.model.repository.PUserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,23 +21,30 @@ import java.time.LocalDateTime;
 public class PUserServiceImpl implements PUserService {
 
     @Autowired
-    PUserRepository pUserRepository;
+    private PUserRepository pUserRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    /**
+     * 소속사 직원에 대한 회원가입을 수행한다.
+     * @param dto : PUserRegisterRequestDto : 소속사 회원가입 정보를 지닌 dto
+     * @throws RegisterException 중복가입 발생시 던지는 예외이다.
+     */
     @Override
     public void register(PUserRegisterRequestDto dto) throws RegisterException {
-        try{
-
-            PUser pUser = PUser.builder()
-                    .email(dto.getEmail())
-                    .code(dto.getCode())
-                    .password(dto.getPassword()) // TODO : 비밀번호 암호화하기
-                    .joinDate(LocalDateTime.now())
-                    .build();
-            pUserRepository.save(pUser);
-        }catch (Exception e){
-            log.error("소속사 회원가입 실패. 가입 데이터 : {}",dto);
-            e.printStackTrace();
+        PUser dbCheck = pUserRepository.findById(dto.getEmail()).orElse(null);
+        if (dbCheck != null) {
+            log.error("소속사 회원가입 실패. 가입 데이터 : {}", dto);
             throw new RegisterException();
         }
+        PUser pUser = PUser.builder()
+                .email(dto.getEmail())
+                .code(dto.getCode())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .joinDate(LocalDateTime.now())
+                .build();
+        pUserRepository.save(pUser);
     }
+
 }
