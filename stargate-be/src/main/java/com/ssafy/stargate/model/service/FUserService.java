@@ -1,8 +1,9 @@
 package com.ssafy.stargate.model.service;
 
-import com.ssafy.stargate.model.dto.FUserRegisterDTO;
+import com.ssafy.stargate.exception.RegisterException;
+import com.ssafy.stargate.model.dto.FUserRegisterDto;
 
 public interface FUserService {
-    public FUserRegisterDTO.Response create(FUserRegisterDTO.Request dto);
+    public FUserRegisterDto.Response create(FUserRegisterDto.Request dto) throws RegisterException;
 
 }

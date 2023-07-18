@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-public class FUserRegisterDTO {
+public class FUserRegisterDto {
     @Builder
     @Getter
     @Setter
@@ -16,7 +16,7 @@ public class FUserRegisterDTO {
         private String name;
         private String nickname;
         private String password;
-        private LocalDateTime birthday; // TODO[?]: String으로 받아야할까?
+        private LocalDateTime birthday;
     }
 
     @Builder
@@ -28,17 +28,18 @@ public class FUserRegisterDTO {
 
     }
 
-    public static Response entityToDTO(FUser fUser){
-        //
+    public static Response entityToDto(FUser fUser){
+        return Response.builder()
+                .build();
     }
 
-    default FUser dTOToEntity(Request dto){
+    public static FUser dtoToEntity(Request dto){
         return FUser.builder()
-                .email(FUser.getEmail())
-                .name(FUser.getName())
-                .nickname(FUser.getNickname())
-                .password(FUser.getPassword())
-                .birthday(FUser.getBirthday())
+                .email(dto.getEmail())
+                .name(dto.getName())
+                .nickname(dto.getNickname())
+                .password(dto.getPassword())
+                .birthday(dto.getBirthday())
                 .build();
     }
 }
