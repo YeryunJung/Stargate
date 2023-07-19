@@ -19,11 +19,18 @@ public class FUserController {
 
     @PostMapping("/register")
     public ResponseEntity<FUserRegisterDto.Response> createFUsers(@ModelAttribute FUserRegisterDto.Request dto) throws RegisterException {
-        try{
-            fUserService.create(dto);
-            return ResponseEntity.ok(null);
+//        try{
+//            fUserService.create(dto);
+//            return ResponseEntity.ok(null);
+//        }catch (RegisterException e){
+//            return  ResponseEntity.status(600).build();
+//        }
+//
+
+        try {
+            return new ResponseEntity<>(fUserService.create(dto), HttpStatus.CREATED);
         }catch (RegisterException e){
-            return  ResponseEntity.status(600).build();
+            throw e;
         }
     }
 }
