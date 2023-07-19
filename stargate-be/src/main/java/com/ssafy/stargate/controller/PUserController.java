@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 소속사 유저 자체와 관련된 모든 연계 컨트롤러
+ * 소속사 그룹 및 멤버는 PManagement 하겠다.
+ */
 @RequestMapping("/pusers")
 @RestController
 @Slf4j
