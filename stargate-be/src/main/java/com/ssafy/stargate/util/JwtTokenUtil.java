@@ -134,8 +134,6 @@ public class JwtTokenUtil {
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.info("[ERR] : 잘못된 JWT SIGN");
-        } catch (ExpiredJwtException e) {
-            log.info("[ERR] : 만료된 JWT TOKEN");
         } catch (UnsupportedJwtException e) {
             log.info("[ERR] : 지원 안되는 JWT TOKEN");
         } catch (IllegalArgumentException e) {

@@ -30,8 +30,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtTokenUtil jwtTokenUtil;
 
     /**
-     * SecurityContextHolder 에 authentication 저장
-     *
+     * SecurityContextHolder 에 authentication 저장, 만료된 토큰이면 601 status code 전송
      * @param request
      * @param response
      * @param filterChain
@@ -41,7 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String bearerToken = request.getHeader("Authorization"); // 헤더 파싱
+        String bearerToken = request.getHeader("Authorization");
         String token = null;
 
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
@@ -54,16 +53,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (ExpiredJwtException jwtException) {
-            log.info("만료된 토큰");
+            log.info("[ERR] : 만료된 JWT TOKEN");
             response.setStatus(601);
-
-            if (token != null && jwtTokenUtil.validateToken(token)) {
-                Authentication authentication = jwtTokenUtil.getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-            filterChain.doFilter(request, response);
+            response.getWriter().write("만료된 토큰입니다");
+            response.getWriter().flush();
         }
-
+        filterChain.doFilter(request, response);
     }
 }
 
