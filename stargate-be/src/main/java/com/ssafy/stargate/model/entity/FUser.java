@@ -9,6 +9,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
+/**
+ * 팬 유저 엔티티
+ */
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor

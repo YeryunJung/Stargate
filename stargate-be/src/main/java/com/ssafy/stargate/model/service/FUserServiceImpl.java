@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * 팬 유저 서비스 구현체
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +25,12 @@ public class FUserServiceImpl implements FUserService{
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * 팬 유저 회원가입을 진행한다.
+     * @param dto [FUserRegisterDto.Request] 유저 회원가입 정보
+     * @return [FUserRegisterDto.Response]
+     * @throws RegisterException 아이디 중복 가입 시 발생하는 에러
+     */
     @Transactional
     public FUserRegisterDto.Response create(FUserRegisterDto.Request dto) throws RegisterException {
         FUser dbCheck = fUserRepository.findById(dto.getEmail()).orElse(null);
