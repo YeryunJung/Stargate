@@ -4,13 +4,21 @@ import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
 import com.ssafy.stargate.model.dto.request.FUserRegisterRequestDto;
-import com.ssafy.stargate.model.dto.request.PUserRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.service.FUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+/*
+TODO
+ - Exception 세분화
+ - 주석 달기
+ - 다른 Exception에 BaseException 적용
+ - GlobalExceptionHandler로 모든 런타임 에러가 처리될 수 있도록 수정
+ - 관련없는 패키지 삭제
+ */
 
 /**
  * 팬 유저에 관한 Controller이다.
@@ -32,16 +40,13 @@ public class FUserController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> createFUsers(@ModelAttribute FUserRegisterRequestDto dto) throws RegisterException {
-        try {
-            fUserService.create(dto);
-            return ResponseEntity.ok(null);
-        } catch (RegisterException e) {
-            return ResponseEntity.status(600).build();
-        }
+        fUserService.create(dto);
+        return ResponseEntity.ok(null);
     }
 
     /**
      * 팬 로그인
+     *
      * @param dto [FUserLoginRequestDto] 팬 로그인 request
      * @return [ResponseEntity<JwtResponseDto>] 성공: [200] JWT Response, 실패: [401]
      * @throws LoginException
