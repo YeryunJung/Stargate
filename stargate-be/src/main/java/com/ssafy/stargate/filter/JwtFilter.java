@@ -1,6 +1,7 @@
 package com.ssafy.stargate.filter;
 
 import com.ssafy.stargate.util.JwtTokenUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +18,7 @@ import java.io.IOException;
 
 
 /**
- *
+ * Http Request 한번의 요청에 대해 한번만 실행해는 JWT 관련 필터
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class JwtFilter extends OncePerRequestFilter{
     private final JwtTokenUtil jwtTokenUtil;
 
     /**
-     *
+     * SecurityContextHolder 에 authentication 저장
      * @param request
      * @param response
      * @param filterChain
@@ -44,11 +45,14 @@ public class JwtFilter extends OncePerRequestFilter{
             token = bearerToken.substring(7);
         }
 
-        if (token != null && jwtTokenUtil.validateToken(token)) {
-
-            Authentication authentication = jwtTokenUtil.getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        try{
+            if (token != null && jwtTokenUtil.validateToken(token)) {
+                Authentication authentication = jwtTokenUtil.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        }catch (ExpiredJwtException jwtException){
+            log.info("만료된 토큰");
+            response.setStatus(601);
         }
         filterChain.doFilter(request,response);
     }

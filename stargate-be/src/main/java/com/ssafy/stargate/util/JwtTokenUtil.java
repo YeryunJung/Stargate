@@ -6,12 +6,13 @@ import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -39,10 +40,12 @@ public class JwtTokenUtil {
      * 토큰 생성
      * @param email String 사용자 이메일
      * @param expire Long 토큰 만료 기한
+     * @param auth String 권한 정보
      * @return String 토큰
      */
-    public String createToken(String email, Long expire){
+    public String createToken(String email, Long expire, String auth){
         Claims claims = Jwts.claims().setSubject(email);
+        claims.put("auth", auth);
 
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
@@ -54,22 +57,25 @@ public class JwtTokenUtil {
 
     }
 
+
     /**
      * AccessToken 생성
      * @param email String 사용자 이메일
+     * @param auth String 권한 정보
      * @return String accessToken
      */
-    public String createAccessToken(String email){
-        return createToken(email, ACCESS_TOKEN_VALID_TIME);
+    public String createAccessToken(String email, String auth){
+        return createToken(email, ACCESS_TOKEN_VALID_TIME, auth);
     }
 
     /**
      * RefreshToken 생성
      * @param email String 사용자 이메일
+     * @param auth String 권한 정보
      * @return String refreshToken
      */
-    public String createRefreshToken(String email){
-        return createToken(email, REFRESH_TOKEN_VALID_TIME);
+    public String createRefreshToken(String email, String auth){
+        return createToken(email, REFRESH_TOKEN_VALID_TIME, auth);
     }
 
     /**
@@ -129,14 +135,22 @@ public class JwtTokenUtil {
 
 
     /**
-     *
-     * @param token
-     * @return
+     * Authentication 객체 생성
+     * @param token String 토큰
+     * @return Authentication 
      */
     public Authentication getAuthentication(String token) {
-        String email = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
+        Claims claims = parseToken(token,key);
+        String email = claims.getSubject();
 
-        return new UsernamePasswordAuthenticationToken(email, "", null);
+        Collection<GrantedAuthority> authority = new ArrayList<>();
+        authority.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                return claims.get("auth").toString();
+            }
+        });
+        return new UsernamePasswordAuthenticationToken( email, "", authority);
     }
 
 }
