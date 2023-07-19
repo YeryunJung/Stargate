@@ -1,7 +1,7 @@
 package com.ssafy.stargate.model.service;
 
 
-import com.ssafy.stargate.model.dto.JwtResponseDto;
+import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +28,20 @@ public class JwtTokenServiceImpl implements JwtTokenService{
     @Override
     public JwtResponseDto create(String refreshToken) throws Exception {
 
-        if(jwtTokenUtil.validateToken(refreshToken)){
-            return JwtResponseDto.builder()
-                    .refreshToken(refreshToken)
-                    .accessToken(jwtTokenUtil.createAccessToken(jwtTokenUtil.getEmailFromToken(refreshToken), jwtTokenUtil.getAuthorityFromToken(refreshToken)))
-                    .build();
-        }else{
-            throw new Exception();
+        try {
+
+            if (jwtTokenUtil.validateToken(refreshToken) && !jwtTokenUtil.isTokenExpired(refreshToken)) {
+                return JwtResponseDto.builder()
+                        .refreshToken(refreshToken)
+                        .accessToken(jwtTokenUtil.createAccessToken(jwtTokenUtil.getEmailFromToken(refreshToken), jwtTokenUtil.getAuthorityFromToken(refreshToken)))
+                        .build();
+            } else {
+                log.info("HELP ME");
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
 
 
