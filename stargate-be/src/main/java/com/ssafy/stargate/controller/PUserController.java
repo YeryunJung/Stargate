@@ -2,6 +2,7 @@ package com.ssafy.stargate.controller;
 
 import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
+import com.ssafy.stargate.model.dto.JwtResponseDto;
 import com.ssafy.stargate.model.dto.PUserRequestDto;
 import com.ssafy.stargate.model.dto.SimpleDto;
 import com.ssafy.stargate.model.service.PUserService;
@@ -44,9 +45,9 @@ public class PUserController {
      * @return 로그인 성공시 SimpleDto에 JWT를 담아 보낸다. 실패시 401 코드 반환
      */
     @PostMapping("/login")
-    public ResponseEntity<SimpleDto> loginPUser(@ModelAttribute PUserRequestDto dto) {
+    public ResponseEntity<JwtResponseDto> loginPUser(@ModelAttribute PUserRequestDto dto) {
         try {
-            return ResponseEntity.ok(new SimpleDto(pUserService.login(dto)));
+            return ResponseEntity.ok(pUserService.login(dto));
         } catch (LoginException e) {
             return ResponseEntity.status(401).build();
         }

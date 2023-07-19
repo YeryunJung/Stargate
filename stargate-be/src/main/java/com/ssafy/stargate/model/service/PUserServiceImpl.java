@@ -2,9 +2,11 @@ package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
+import com.ssafy.stargate.model.dto.JwtResponseDto;
 import com.ssafy.stargate.model.dto.PUserRequestDto;
 import com.ssafy.stargate.model.entity.PUser;
 import com.ssafy.stargate.model.repository.PUserRepository;
+import com.ssafy.stargate.util.JwtTokenUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +28,9 @@ public class PUserServiceImpl implements PUserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     /**
      * 소속사 직원에 대한 회원가입을 수행한다.
@@ -54,10 +59,13 @@ public class PUserServiceImpl implements PUserService {
      * @return String : 새로 생성한 JWT 를 반환한다.
      */
     @Override
-    public String login(PUserRequestDto dto) throws LoginException{
+    public JwtResponseDto login(PUserRequestDto dto) throws LoginException{
         PUser pUser = pUserRepository.findById(dto.getEmail()).orElseThrow(() -> new LoginException());
         if(passwordEncoder.matches(dto.getPassword(),pUser.getPassword())){
-            return "JWT TEMP";
+            return JwtResponseDto.builder()
+                    .refreshToken(jwtTokenUtil.createRefreshToken(pUser.getEmail()))
+                    .accessToken(jwtTokenUtil.createAccessToken(pUser.getEmail()))
+                    .build();
         }else{
             throw new LoginException();
         }

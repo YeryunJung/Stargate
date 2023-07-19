@@ -2,6 +2,7 @@ package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
+import com.ssafy.stargate.model.dto.JwtResponseDto;
 import com.ssafy.stargate.model.dto.PUserRequestDto;
 
 /**
@@ -10,5 +11,5 @@ import com.ssafy.stargate.model.dto.PUserRequestDto;
  */
 public interface PUserService {
     void register(PUserRequestDto dto) throws RegisterException;
-    String login(PUserRequestDto dto) throws LoginException;
+    JwtResponseDto login(PUserRequestDto dto) throws LoginException;
 }
