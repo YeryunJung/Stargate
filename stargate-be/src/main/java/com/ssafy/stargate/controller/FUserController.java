@@ -1,12 +1,10 @@
 package com.ssafy.stargate.controller;
 
 import com.ssafy.stargate.exception.RegisterException;
-import com.ssafy.stargate.model.dto.FUserRegisterDto;
+import com.ssafy.stargate.model.dto.request.FUserRegisterRequestDto;
 import com.ssafy.stargate.model.service.FUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,17 +21,17 @@ public class FUserController {
 
     /**
      * 팬 유저 회원가입
-     * @param dto [FUserRegisterDto.Request] 팬 유저 회원가입 request
-     * @return [ResponseEntity<FUserRegisterDto.Response>] 팬 유저 회원가입 response
+     *
+     * @param dto [FUserRegisterRequestDto] 팬 유저 회원가입 request
      * @throws RegisterException 회원가입 등록 실패
      */
     @PostMapping("/register")
-    public ResponseEntity<FUserRegisterDto.Response> createFUsers(@ModelAttribute FUserRegisterDto.Request dto) throws RegisterException {
-        try{
-            return ResponseEntity.ok(fUserService.create(dto));
-        }catch (RegisterException e){
-            return  ResponseEntity.status(600).build();
+    public ResponseEntity<?> createFUsers(@ModelAttribute FUserRegisterRequestDto dto) throws RegisterException {
+        try {
+            fUserService.create(dto);
+            return ResponseEntity.ok(null);
+        } catch (RegisterException e) {
+            return ResponseEntity.status(600).build();
         }
-
     }
 }

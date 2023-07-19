@@ -20,16 +20,16 @@ import java.time.LocalDateTime;
 @Getter
 public class FUser extends BaseEntity{
     @Id
-    @Column(length = 225)
+    @Column
     private String email;
 
-    @Column(length = 225, nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @Column(length = 225)
+    @Column
     private String nickname;
 
-    @Column(length = 225, nullable = false)
+    @Column(nullable = false)
     private String password;
 
     @Column

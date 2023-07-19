@@ -1,7 +1,7 @@
 package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.exception.RegisterException;
-import com.ssafy.stargate.model.dto.PUserRegisterRequestDto;
+import com.ssafy.stargate.model.dto.request.PUserRegisterRequestDto;
 import com.ssafy.stargate.model.entity.PUser;
 import com.ssafy.stargate.model.repository.PUserRepository;
 import lombok.extern.slf4j.Slf4j;
