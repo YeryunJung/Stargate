@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -23,12 +24,14 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class JwtFilter extends OncePerRequestFilter{
+public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     /**
      * SecurityContextHolder 에 authentication 저장
+     *
      * @param request
      * @param response
      * @param filterChain
@@ -41,22 +44,27 @@ public class JwtFilter extends OncePerRequestFilter{
         String bearerToken = request.getHeader("Authorization"); // 헤더 파싱
         String token = null;
 
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             token = bearerToken.substring(7);
         }
 
-        try{
+        try {
             if (token != null && jwtTokenUtil.validateToken(token)) {
                 Authentication authentication = jwtTokenUtil.getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-        }catch (ExpiredJwtException jwtException){
+        } catch (ExpiredJwtException jwtException) {
             log.info("만료된 토큰");
             response.setStatus(601);
-        }
-        filterChain.doFilter(request,response);
-    }
 
+            if (token != null && jwtTokenUtil.validateToken(token)) {
+                Authentication authentication = jwtTokenUtil.getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+            filterChain.doFilter(request, response);
+        }
+
+    }
 }
 
 
