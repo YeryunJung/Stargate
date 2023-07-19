@@ -23,7 +23,7 @@ public class JwtTokenServiceImpl implements JwtTokenService{
     /**
      * refreshToken 을 바탕으로 accessToken 새로 생성
      * @param refreshToken String refreshToken
-     * @return
+     * @return JwtResponseDto 새로 생성된 토큰
      */
     @Override
     public JwtResponseDto create(String refreshToken) throws Exception {

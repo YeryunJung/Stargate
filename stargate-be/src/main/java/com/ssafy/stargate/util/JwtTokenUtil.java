@@ -28,7 +28,7 @@ public class JwtTokenUtil {
 
     private final byte[] key;
 
-    private final static Long ACCESS_TOKEN_VALID_TIME = 30 * 60 * 1000L;
+    private final static Long ACCESS_TOKEN_VALID_TIME = 24 * 60 * 60 * 1000L;
 
     private final static Long REFRESH_TOKEN_VALID_TIME = 14 * 24 * 60 * 60 * 1000L;
 
