@@ -26,7 +26,7 @@ public class PGroup {
     @Column(name = "name")
     private String name;
 
-    @OneToMany(mappedBy = "p_member")
+    @OneToMany(mappedBy = "pGroup")
     private List<PMember> members;
 
     @ManyToOne

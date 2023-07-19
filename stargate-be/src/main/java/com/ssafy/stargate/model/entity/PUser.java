@@ -34,7 +34,7 @@ public class PUser {
     @Column(name = "join_date",columnDefinition = "timestamp default current_timestamp()")
     private LocalDateTime joinDate;
 
-    @OneToMany(mappedBy = "p_group")
+    @OneToMany(mappedBy = "pUser")
     List<PGroup> pGroups = new ArrayList<>();
 
 }
