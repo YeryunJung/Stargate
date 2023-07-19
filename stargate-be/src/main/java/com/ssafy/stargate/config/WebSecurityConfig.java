@@ -1,5 +1,6 @@
 package com.ssafy.stargate.config;
 
+import com.ssafy.stargate.filter.ExceptionHandlerFilter;
 import com.ssafy.stargate.filter.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,8 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
+    @Autowired
+    private ExceptionHandlerFilter exceptionHandlerFilter;
 
     @Autowired
     private JwtFilter jwtFilter;
@@ -35,6 +38,7 @@ public class WebSecurityConfig {
                 .formLogin((form)-> form.disable())
                 .csrf((csrf)->csrf.disable())
                 .cors(Customizer.withDefaults())
+                .addFilterBefore(exceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

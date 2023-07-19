@@ -42,7 +42,7 @@ public class PUserServiceImpl implements PUserService {
         PUser dbCheck = pUserRepository.findById(dto.getEmail()).orElse(null);
         if (dbCheck != null) {
             log.error("소속사 회원가입 실패. 가입 데이터 : {}", dto);
-            throw new RegisterException();
+            throw new RegisterException("소속사 회원 가입 실패");
         }
         PUser pUser = PUser.builder()
                 .email(dto.getEmail())

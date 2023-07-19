@@ -32,12 +32,8 @@ public class FUserController {
      */
     @PostMapping("/register")
     public ResponseEntity<?> createFUsers(@ModelAttribute FUserRegisterRequestDto dto) throws RegisterException {
-        try {
-            fUserService.create(dto);
-            return ResponseEntity.ok(null);
-        } catch (RegisterException e) {
-            return ResponseEntity.status(600).build();
-        }
+        fUserService.create(dto);
+        return ResponseEntity.ok(null);
     }
 
     /**
@@ -54,4 +50,5 @@ public class FUserController {
             return ResponseEntity.status(401).build();
         }
     }
+
 }

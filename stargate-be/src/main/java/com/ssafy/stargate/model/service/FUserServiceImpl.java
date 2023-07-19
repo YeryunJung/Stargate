@@ -42,8 +42,8 @@ public class FUserServiceImpl implements FUserService {
     public void create(FUserRegisterRequestDto dto) throws RegisterException {
         FUser dbCheck = fUserRepository.findById(dto.getEmail()).orElse(null);
         if (dbCheck != null) {
-            log.error("회원 회원가입 실패. 가입 데이터 : {}", dto);
-            throw new RegisterException();
+            log.error("팬 유저 회원가입 실패. 가입 데이터 : {}", dto);
+            throw new RegisterException("팬 유저 회원가입 실패");
         }
 
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
