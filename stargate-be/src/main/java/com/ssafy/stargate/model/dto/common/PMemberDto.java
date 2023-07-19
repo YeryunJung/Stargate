@@ -1,4 +1,4 @@
-package com.ssafy.stargate.model.dto.response;
+package com.ssafy.stargate.model.dto.common;
 
 import lombok.*;
 
@@ -6,7 +6,9 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
-public class PMemberResponseDto {
+@NoArgsConstructor
+@ToString
+public class PMemberDto {
     private long memberNo;
     private String name;
 }
