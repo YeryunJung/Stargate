@@ -20,6 +20,7 @@ import java.util.Date;
 
 /**
  * JWT 토큰 설정
+ * @author 김도현
  */
 @Slf4j
 @Component
@@ -42,7 +43,6 @@ public class JwtTokenUtil {
 
     /**
      * 토큰 생성
-     *
      * @param email  String 사용자 이메일
      * @param expire Long 토큰 만료 기한
      * @param auth   String 권한 정보
@@ -65,7 +65,6 @@ public class JwtTokenUtil {
 
     /**
      * AccessToken 생성
-     *
      * @param email String 사용자 이메일
      * @param auth  String 권한 정보
      * @return String accessToken
@@ -76,7 +75,6 @@ public class JwtTokenUtil {
 
     /**
      * RefreshToken 생성
-     *
      * @param email String 사용자 이메일
      * @param auth  String 권한 정보
      * @return String refreshToken
@@ -87,7 +85,6 @@ public class JwtTokenUtil {
 
     /**
      * 토큰 파싱
-     *
      * @param token String 토큰
      * @param key   byte[] 키정보
      * @return Claims 파싱 하려는 토큰의 payload 내의 Claim 정보
@@ -102,7 +99,6 @@ public class JwtTokenUtil {
 
     /**
      * 토큰에서 subject 에 저장된 email 정보 추출
-     *
      * @param token String 토큰
      * @return String 토큰에서 추출한 이메일
      */
@@ -114,7 +110,6 @@ public class JwtTokenUtil {
 
     /**
      * 토큰 만료 여부
-     *
      * @param token String 토큰
      * @return boolean 토큰이 만료 되었으면 true, 만료 안되었으면 false
      */
@@ -124,7 +119,6 @@ public class JwtTokenUtil {
 
     /**
      * 토큰이 유요한지 검증
-     *
      * @param token String 토큰
      * @return boolean 토큰이 유요하면 true
      */
@@ -145,7 +139,6 @@ public class JwtTokenUtil {
 
     /**
      * Authentication 객체 생성
-     *
      * @param token String 토큰
      * @return Authentication
      */
@@ -161,6 +154,16 @@ public class JwtTokenUtil {
             }
         });
         return new UsernamePasswordAuthenticationToken(email, "", authority);
+    }
+
+    /**
+     * 토큰에 저장된 권한 정보 추출
+     * @param token String 토큰
+     * @return String 토큰 안에 저장된 권한 정보
+     */
+    public String getAuthorityFromToken(String token){
+        String auth = String.valueOf(parseToken(token, key).get("auth"));
+        return auth;
     }
 
 }
