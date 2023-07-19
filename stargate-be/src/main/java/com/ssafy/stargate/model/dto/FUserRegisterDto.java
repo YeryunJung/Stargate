@@ -2,8 +2,10 @@ package com.ssafy.stargate.model.dto;
 
 import com.ssafy.stargate.model.entity.FUser;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class FUserRegisterDto {
     @Builder
@@ -11,19 +13,22 @@ public class FUserRegisterDto {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @ToString
     public static class Request {
         private String email;
         private String name;
         private String nickname;
         private String password;
-        private LocalDateTime birthday;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private String birthday;
     }
 
     @Builder
     @Getter
     @Setter
-    @AllArgsConstructor
+//    @AllArgsConstructor
     @NoArgsConstructor
+    @ToString
     public static class Response {
 
     }
@@ -39,7 +44,7 @@ public class FUserRegisterDto {
                 .name(dto.getName())
                 .nickname(dto.getNickname())
                 .password(dto.getPassword())
-                .birthday(dto.getBirthday())
+                .birthday(LocalDateTime.parse(dto.getBirthday() + "T00:00:00"))
                 .build();
     }
 }

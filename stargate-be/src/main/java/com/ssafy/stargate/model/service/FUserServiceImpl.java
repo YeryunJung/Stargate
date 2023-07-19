@@ -23,17 +23,16 @@ public class FUserServiceImpl implements FUserService{
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public FUserRegisterDto.Response create(FUserRegisterDto.Request requestDto) throws RegisterException {
-        FUser dbCheck = fUserRepository.findById(requestDto.getEmail()).orElse(null);
+    public FUserRegisterDto.Response create(FUserRegisterDto.Request dto) throws RegisterException {
+        FUser dbCheck = fUserRepository.findById(dto.getEmail()).orElse(null);
         if (dbCheck != null) {
-            log.error("회원 회원가입 실패. 가입 데이터 : {}", requestDto);
+            log.error("회원 회원가입 실패. 가입 데이터 : {}", dto);
             throw new RegisterException();
         }
 
-        requestDto.setPassword(passwordEncoder.encode(requestDto.getPassword()));
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        FUser fuser = FUserRegisterDto.dtoToEntity(requestDto);
-
+        FUser fuser = FUserRegisterDto.dtoToEntity(dto);
         return FUserRegisterDto.entityToDto(fUserRepository.save(fuser));
     }
 }
