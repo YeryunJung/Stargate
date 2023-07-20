@@ -2,6 +2,7 @@ package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.exception.EmailDuplicationException;
 import com.ssafy.stargate.exception.LoginException;
+import com.ssafy.stargate.exception.PasswordFailException;
 import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.dto.request.PUserRequestDto;
@@ -68,6 +69,20 @@ public class PUserServiceImpl implements PUserService {
                     .build();
         }else{
             throw new LoginException("소속사 로그인 실패");
+        }
+    }
+
+    /**
+     * 소속사 유저를 삭제한다.
+     * @param dto PUserRequestDto 삭제할 유저의 이메일, 비밀번호
+     */
+    @Override
+    public void deletePUser(PUserRequestDto dto) {
+        PUser pUser = pUserRepository.findById(dto.getEmail()).orElseThrow();
+        if(passwordEncoder.matches(dto.getPassword(),pUser.getPassword())){
+            pUserRepository.delete(pUser);
+        }else{
+            throw new PasswordFailException("비밀번호가 틀렸습니다.");
         }
     }
 }

@@ -13,4 +13,6 @@ import com.ssafy.stargate.model.dto.request.PUserRequestDto;
 public interface PUserService {
     void register(PUserRequestDto dto) throws EmailDuplicationException, RegisterException;
     JwtResponseDto login(PUserRequestDto dto) throws LoginException;
+
+    void deletePUser(PUserRequestDto dto);
 }

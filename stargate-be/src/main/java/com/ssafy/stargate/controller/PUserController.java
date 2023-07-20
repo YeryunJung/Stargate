@@ -9,10 +9,7 @@ import com.ssafy.stargate.model.service.PUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 소속사 유저 자체와 관련된 모든 연계 컨트롤러
@@ -55,6 +52,18 @@ public class PUserController {
         } catch (LoginException e) {
             return ResponseEntity.status(401).build();
         }
+    }
+
+    /**
+     * 회원 탈퇴를 수행한다.
+     * 이메일과 비밀번호를 필수로 요구한다.
+     * @param dto PUserRequestDto 소속사 유저 정보(이메일, 비밀번호 필)
+     * @return 성공시 200
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deletePUser(@RequestBody PUserRequestDto dto){
+        pUserService.deletePUser(dto);
+        return ResponseEntity.ok(null);
     }
 
 

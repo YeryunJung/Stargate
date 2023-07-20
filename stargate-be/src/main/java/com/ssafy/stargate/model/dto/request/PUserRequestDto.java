@@ -16,4 +16,5 @@ public class PUserRequestDto {
     private String password;
     private String code;
     private String name;
+    private String originalPassword;
 }
