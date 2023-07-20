@@ -1,8 +1,10 @@
 package com.ssafy.stargate.controller;
 
 import com.ssafy.stargate.model.dto.common.PGroupDto;
+import com.ssafy.stargate.model.dto.common.PMemberDto;
 import com.ssafy.stargate.model.service.PManagementService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,10 +39,31 @@ public class PManagementController {
      * @return 신규 생성한 그룹 객체
      */
     @PostMapping("/group/create")
-    public ResponseEntity<?> createGroup(@RequestBody PGroupDto dto, Principal principal){
+    public ResponseEntity<PGroupDto> createGroup(@RequestBody PGroupDto dto, Principal principal){
         PGroupDto group = managmentService.createGroup(dto,principal);
         return ResponseEntity.status(201).body(group);
     }
+
+    /**
+     * 그룹을 삭제한다.
+     * @param dto : PGroupDto 삭제할 그룹 번호가 포함된 dto
+     * @param principal : Principal = 소속사 유저 정보(JWT에서)
+     * @return 성공여부. 기본 200
+     */
+    @DeleteMapping("/group/delete")
+    public ResponseEntity<?> deleteGroup(@RequestBody PGroupDto dto, Principal principal){
+        managmentService.deleteGroup(dto,principal);
+        return ResponseEntity.ok(null);
+    }
+
+    @DeleteMapping("/member/delete")
+    public ResponseEntity<?> deleteMember(@RequestBody PMemberDto dto){
+        return ResponseEntity.ok(null);
+    }
+
+
+
+
 
 
 }

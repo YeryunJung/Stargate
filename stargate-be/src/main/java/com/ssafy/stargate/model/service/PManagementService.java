@@ -9,4 +9,6 @@ public interface PManagementService {
     List<PGroupDto> getGroupList(Principal principal);
 
     PGroupDto createGroup(PGroupDto dto, Principal principal);
+
+    void deleteGroup(PGroupDto dto, Principal principal);
 }

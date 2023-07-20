@@ -25,7 +25,8 @@ public class PManagementServiceImpl implements PManagementService {
 
 
     /**
-     * 소속사가 보유한 그룹 리스트를 가져온다.
+     * 소속사의 그룹 리스트를 가져온다.
+     * 이 그룹 리스트에는 각기 리스트 소속의 연예인이 포함된다.
      *
      * @param principal 유저 email이 포함된 principal 객체
      * @return 해당 소속사 유저가 보유한 모든 그룹의 리스트
@@ -33,11 +34,15 @@ public class PManagementServiceImpl implements PManagementService {
     @Override
     public List<PGroupDto> getGroupList(Principal principal) {
         String email = principal.getName();
-        log.info("PUSER EMAIL = {}", email);
         List<PGroup> groups = groupRepository.findAllByEmail(email);
         return groups.stream().map((pGroup -> PGroupDto.builder()
                 .groupNo(pGroup.getGroupNo())
                 .name(pGroup.getName())
+                .members(pGroup.getMembers().stream().map(pMember -> PMemberDto.builder()
+                        .memberNo(pMember.getMemberNo())
+                        .name(pMember.getName())
+                        .build()
+                ).toList())
                 .build()
         )).toList();
     }
@@ -66,5 +71,18 @@ public class PManagementServiceImpl implements PManagementService {
                 .groupNo(pGroup.getGroupNo())
                 .name(pGroup.getName())
                 .build();
+    }
+
+    /**
+     * 그룹 번호를 기반으로 삭제한다.
+     * 삭제 전에 소속사 체크를 통해 정말로 그룹의 주인인지 확인한다.
+     * @param dto PGroupDto = 삭제할 그룹 번호가 포함된 dto
+     * @param principal Principal : 소속사 유저 정보
+     */
+    @Override
+    public void deleteGroup(PGroupDto dto, Principal principal) {
+        String email = principal.getName();
+        long groupNo = dto.getGroupNo();
+        groupRepository.deleteGroupByGroupNoAndEmail(groupNo,email);
     }
 }
