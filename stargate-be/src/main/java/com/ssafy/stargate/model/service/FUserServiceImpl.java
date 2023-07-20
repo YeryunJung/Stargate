@@ -4,8 +4,8 @@ import com.ssafy.stargate.exception.EmailDuplicationException;
 import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.common.FUserDto;
+import com.ssafy.stargate.model.dto.common.FUserFindIdDto;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
-import com.ssafy.stargate.model.dto.request.FUserRegisterRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.entity.FUser;
 import com.ssafy.stargate.model.repository.FUserRepository;
@@ -16,10 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Optional;
 
 /**
  * 팬 유저 서비스 구현체
@@ -45,7 +44,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws RegisterException 아이디 중복 가입 시 발생하는 에러
      */
     @Transactional
-    public void create(FUserRegisterRequestDto dto) throws EmailDuplicationException, RegisterException {
+    public void create(@Validated FUserDto dto) throws EmailDuplicationException, RegisterException {
         FUser dbCheck = fUserRepository.findById(dto.getEmail()).orElse(null);
         if (dbCheck != null) {
             throw new EmailDuplicationException("소속사 아이디 중복");
@@ -120,12 +119,25 @@ public class FUserServiceImpl implements FUserService {
 
     /**
      * FUser 회원 탈퇴
-     * @param fUserDto 회원 email 정보가 담긴 FUserDto 객체
-     * @param principal 유저 email이 포함된 principal 객체
+     * @param dto 회원 email 정보가 담긴 FUserDto 객체
      */
     @Override
-    public void deleteFUser(FUserDto fUserDto, Principal principal) {
-        fUserRepository.deleteById(principal.getName());
+    public void deleteFUser(FUserDto dto) {
+        fUserRepository.deleteById(dto.getEmail());
+    }
+
+    /**
+     * FUser 이메일 아이디 찾기
+     * @param dto
+     * @return
+     */
+    @Override
+    public FUserFindIdDto getFUserId(FUserFindIdDto dto) {
+        FUser fUser = fUserRepository.findById(dto.getEmail()).orElseThrow();
+
+        return FUserFindIdDto.builder()
+                .email(fUser.getEmail())
+                .build();
     }
 
 

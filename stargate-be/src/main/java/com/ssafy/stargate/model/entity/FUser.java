@@ -34,4 +34,7 @@ public class FUser extends BaseEntity{
 
     @Column
     private LocalDateTime birthday;
+
+    @Column(nullable = false)
+    private String phone;
 }
