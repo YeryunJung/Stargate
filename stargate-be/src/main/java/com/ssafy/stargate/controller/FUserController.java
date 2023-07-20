@@ -2,15 +2,21 @@ package com.ssafy.stargate.controller;
 
 import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
+import com.ssafy.stargate.model.dto.common.FUserDto;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
 import com.ssafy.stargate.model.dto.request.FUserRegisterRequestDto;
 import com.ssafy.stargate.model.dto.request.PUserRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.service.FUserService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.HashMap;
 
 /**
  * 팬 유저에 관한 Controller이다.
@@ -54,4 +60,46 @@ public class FUserController {
             return ResponseEntity.status(401).build();
         }
     }
+
+    /**
+     * 팬 유저 마이페이지 정보
+     * @param email HashMap<String, Object> email 회원 이메일
+     * @param principal 유저 email이 담긴 객체
+     * @return [ResponseEntity<FUserDto>] 회원 정보
+     * @throws Exception
+     */
+    @GetMapping("/info")
+    public ResponseEntity<FUserDto> getFUserInfo(@RequestBody HashMap<String, Object> email, Principal principal) throws Exception {
+        FUserDto fUser = fUserService.getFUser(principal);
+        log.info("user{}", fUser);
+        return ResponseEntity.ok(fUser);
+    }
+
+
+    /**
+     * FUser 회원 정보 변경 (name, nickname, password, birthday 변경 가능)
+     * @param dto 팬회원 정보가 저장된 DTO
+     * @return 성공 -> 200 코드 반환
+     */
+    @PutMapping("/update")
+    public ResponseEntity<?> updateFUserInfo(@ModelAttribute FUserDto dto){
+        fUserService.updateFUser(dto);
+        return ResponseEntity.ok(null);
+    }
+
+    /**
+     * FUser 회원 탈퇴
+     * @param dto 팬회원 정보가 저장된 DTO
+     * @param principal 유저 email이 담긴 객체
+     * @return 성공 -> 200 코드 반환
+     */
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteFUserInfo(@RequestBody FUserDto dto, Principal principal){
+        fUserService.deleteFUser(dto, principal);
+        return ResponseEntity.ok(null);
+    }
+
+
+
 }

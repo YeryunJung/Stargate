@@ -36,7 +36,6 @@ public class JwtTokenServiceImpl implements JwtTokenService{
                         .accessToken(jwtTokenUtil.createAccessToken(jwtTokenUtil.getEmailFromToken(refreshToken), jwtTokenUtil.getAuthorityFromToken(refreshToken)))
                         .build();
             } else {
-                log.info("HELP ME");
                 throw new Exception();
             }
         } catch (Exception e) {
