@@ -1,10 +1,8 @@
 package com.ssafy.stargate.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-
 /**
- * 회원가입 실패시 던지는 오류이다.
+ * 회원가입 실패 시 던지는 에러 이다.
+ * [Status: 600]
  */
 public class RegisterException extends BaseException {
     private final String message;
@@ -15,7 +13,7 @@ public class RegisterException extends BaseException {
     }
 
     @Override
-    public int getHttpStatus() {
+    public int getStatus() {
         return 600;
     }
 
