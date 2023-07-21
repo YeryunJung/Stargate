@@ -7,6 +7,7 @@ import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.common.FUserDto;
 import com.ssafy.stargate.model.dto.common.FUserFindIdDto;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
+import com.ssafy.stargate.model.dto.request.PUserRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.service.FUserService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 
 /**
@@ -94,9 +94,9 @@ public class FUserController {
     }
 
     @GetMapping("/find-id")
-    public ResponseEntity<?> findFUserId(@RequestBody @Validated FUserFindIdDto dto) throws BaseException{
+    public ResponseEntity<?> findFUserId(@RequestBody @Validated FUserFindIdDto dto) throws BaseException {
         try {
-            return ResponseEntity.ok(fUserService.getFUserId(dto));
+            return ResponseEntity.ok(fUserService.getFUserById(dto));
         } catch (BaseException e) {
             return ResponseEntity.status(401).build();
         }

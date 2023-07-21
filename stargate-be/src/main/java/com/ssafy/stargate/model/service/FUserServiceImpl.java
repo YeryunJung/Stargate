@@ -17,8 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-
 import java.security.Principal;
+
 
 /**
  * 팬 유저 서비스 구현체
@@ -100,7 +100,6 @@ public class FUserServiceImpl implements FUserService {
                 .build();
     }
 
-
     /**
      * FUser 회원 정보 수정
      * @param fUserDto FUserDto 회원 email 정보가 담긴 FUserDto 객체
@@ -134,14 +133,13 @@ public class FUserServiceImpl implements FUserService {
      * @return FUserFindIdDto
      */
     @Override
-    public FUserFindIdDto getFUserId(FUserFindIdDto dto) {
+    public FUserFindIdDto getFUserById(FUserFindIdDto dto) {
         FUser fUser = fUserRepository.findById(dto.getEmail()).orElseThrow();
 
         return FUserFindIdDto.builder()
                 .email(fUser.getEmail())
                 .build();
     }
-
 
 }
 

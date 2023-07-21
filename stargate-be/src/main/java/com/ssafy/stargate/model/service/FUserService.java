@@ -8,8 +8,8 @@ import com.ssafy.stargate.model.dto.common.FUserFindIdDto;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import org.springframework.validation.annotation.Validated;
-
 import java.security.Principal;
+
 
 /**
  * 팬 유저 서비스 인터페이스
@@ -17,10 +17,14 @@ import java.security.Principal;
  */
 public interface FUserService {
     public void create(@Validated FUserDto dto) throws EmailDuplicationException, RegisterException;
+
     public JwtResponseDto login(FUserLoginRequestDto dto) throws LoginException;
+
     public FUserDto getFUser(Principal principal) throws Exception;
+
     public void updateFUser(FUserDto fUserDto, Principal principal);
+
     public void deleteFUser(Principal principal);
 
-    public FUserFindIdDto getFUserId(FUserFindIdDto dto);
+    public FUserFindIdDto getFUserById(FUserFindIdDto dto);
 }
