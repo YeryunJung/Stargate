@@ -58,7 +58,7 @@ public class FUserController {
 
     /**
      * 팬 유저 마이페이지 정보
-     * @param principal 유저 email이 담긴 객체
+     * @param principal Principal 유저 email이 담긴 객체
      * @return [ResponseEntity<FUserDto>] 회원 정보
      * @throws Exception
      */
@@ -69,27 +69,27 @@ public class FUserController {
         return ResponseEntity.ok(fUser);
     }
 
-
     /**
      * FUser 회원 정보 변경 (name, nickname, password, birthday 변경 가능)
-     * @param dto 팬회원 정보가 저장된 DTO
+     * @param dto FUserDto 팬회원 정보가 저장된 DTO
+     * @param principal Principal 유저 email이 담긴 객체
      * @return 성공 -> 200 코드 반환
      */
     @PutMapping("/update")
-    public ResponseEntity<?> updateFUserInfo(@Validated @ModelAttribute FUserDto dto){
-        fUserService.updateFUser(dto);
+    public ResponseEntity<?> updateFUserInfo(@Validated @ModelAttribute FUserDto dto, Principal principal){
+        fUserService.updateFUser(dto, principal);
         return ResponseEntity.ok(null);
     }
 
+
     /**
      * FUser 회원 탈퇴
-     * @param dto 팬회원 정보가 저장된 DTO
+     * @param principal Principal 유저 email이 담긴 객체
      * @return 성공 -> 200 코드 반환
      */
-
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteFUserInfo(@RequestBody FUserDto dto){
-        fUserService.deleteFUser(dto);
+    public ResponseEntity<?> deleteFUserInfo(Principal principal){
+        fUserService.deleteFUser(principal);
         return ResponseEntity.ok(null);
     }
 

@@ -19,8 +19,8 @@ public interface FUserService {
     public void create(@Validated FUserDto dto) throws EmailDuplicationException, RegisterException;
     public JwtResponseDto login(FUserLoginRequestDto dto) throws LoginException;
     public FUserDto getFUser(Principal principal) throws Exception;
-    public void updateFUser(FUserDto fUserDto);
-    public void deleteFUser(FUserDto fUserDto);
+    public void updateFUser(FUserDto fUserDto, Principal principal);
+    public void deleteFUser(Principal principal);
 
     public FUserFindIdDto getFUserId(FUserFindIdDto dto);
 }

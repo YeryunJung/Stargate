@@ -100,14 +100,16 @@ public class FUserServiceImpl implements FUserService {
                 .build();
     }
 
+
     /**
      * FUser 회원 정보 수정
-     * @param fUserDto 회원 email 정보가 담긴 FUserDto 객체
+     * @param fUserDto FUserDto 회원 email 정보가 담긴 FUserDto 객체
+     * @param principal Principal 유저 email이 포함된 principal 객체
      */
     @Override
-    public void updateFUser(FUserDto fUserDto) {
+    public void updateFUser(FUserDto fUserDto, Principal principal) {
 
-        FUser fUser = fUserRepository.findById(fUserDto.getEmail()).orElseThrow();
+        FUser fUser = fUserRepository.findById(principal.getName()).orElseThrow();
 
         fUser.setName(fUser.getName());
         fUser.setPassword(fUser.getPassword());
@@ -119,17 +121,17 @@ public class FUserServiceImpl implements FUserService {
 
     /**
      * FUser 회원 탈퇴
-     * @param dto 회원 email 정보가 담긴 FUserDto 객체
+     * @param principal Principal 회원 email 정보가 담긴 FUserDto 객체
      */
     @Override
-    public void deleteFUser(FUserDto dto) {
-        fUserRepository.deleteById(dto.getEmail());
+    public void deleteFUser(Principal principal) {
+        fUserRepository.deleteById(principal.getName());
     }
 
     /**
      * FUser 이메일 아이디 찾기
-     * @param dto
-     * @return
+     * @param dto FUserFindIdDto 회원 email 을 찾기 위한 FUserFindIdDto 객체
+     * @return FUserFindIdDto
      */
     @Override
     public FUserFindIdDto getFUserId(FUserFindIdDto dto) {

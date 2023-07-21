@@ -36,5 +36,6 @@ public class FUserDto {
     private LocalDateTime birthday;
 
     @NotBlank(message = "전화번호는 필수 입력사항")
+    @Pattern(regexp = "^\\d{3}-\\d{3,4}-\\d{4}$")
     private String phone;
 }
