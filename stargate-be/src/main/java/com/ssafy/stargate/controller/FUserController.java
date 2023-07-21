@@ -1,13 +1,12 @@
 package com.ssafy.stargate.controller;
 
-import com.ssafy.stargate.exception.BaseException;
 import com.ssafy.stargate.exception.EmailDuplicationException;
 import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.common.FUserDto;
 import com.ssafy.stargate.model.dto.common.FUserFindIdDto;
+import com.ssafy.stargate.model.dto.common.FUserFindPwDto;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
-import com.ssafy.stargate.model.dto.request.PUserRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.service.FUserService;
 import lombok.RequiredArgsConstructor;
@@ -60,10 +59,9 @@ public class FUserController {
      * 팬 유저 마이페이지 정보
      * @param principal Principal 유저 email이 담긴 객체
      * @return [ResponseEntity<FUserDto>] 회원 정보
-     * @throws Exception
      */
-    @GetMapping("/info")
-    public ResponseEntity<FUserDto> getFUserInfo(Principal principal) throws Exception {
+    @GetMapping("/get")
+    public ResponseEntity<FUserDto> getFUserInfo(Principal principal){
         FUserDto fUser = fUserService.getFUser(principal);
         log.info("user{}", fUser);
         return ResponseEntity.ok(fUser);
@@ -76,7 +74,7 @@ public class FUserController {
      * @return 성공 -> 200 코드 반환
      */
     @PutMapping("/update")
-    public ResponseEntity<?> updateFUserInfo(@Validated @ModelAttribute FUserDto dto, Principal principal){
+    public ResponseEntity<?> updateFUserInfo(@ModelAttribute @Validated FUserDto dto, Principal principal){
         fUserService.updateFUser(dto, principal);
         return ResponseEntity.ok(null);
     }
@@ -93,18 +91,61 @@ public class FUserController {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/find-id")
-    public ResponseEntity<?> findFUserId(@RequestBody @Validated FUserFindIdDto dto) throws BaseException {
+    /**
+     * FUser 아이디 찾기
+     * @param dto FUserFindIdDto 아이디를 찾기 위한 객체 (name,phone 정보 저장)
+     * @return [ResponseEntity<FUserFindIdDto>] (아이디- 이메일) 저장되어 있는 객체
+     * @throws LoginException
+     */
+    @PostMapping("/find-id")
+    public ResponseEntity<?> findFUserId(@ModelAttribute @Validated FUserFindIdDto dto) throws LoginException {
         try {
-            return ResponseEntity.ok(fUserService.getFUserById(dto));
-        } catch (BaseException e) {
+            return ResponseEntity.ok(fUserService.getFUserId(dto));
+        } catch (LoginException e) {
             return ResponseEntity.status(401).build();
         }
-
     }
 
+    /**
+     * FUser 비밀번호 찾기 요청에 대해 인증 번호 발송
+     * @param dto FUserFindPwDto 비밀번호를 찾기 위한 객체 (이메일 정보 필수로 저장)
+     * @return [ResponseEntity<FUserFindPwDto>] 인증 번호가 저장되어 있는 객체 반환
+     * @throws LoginException
+     */
+    @PostMapping("/get-code")
+    public ResponseEntity<?> getCertifyCode(@RequestBody @Validated FUserFindPwDto dto) throws LoginException{
+        try {
+            return ResponseEntity.ok(fUserService.getCertifyCode(dto));
+        }catch (LoginException e){
+            return ResponseEntity.status(401).build();
+        }
+    }
 
+    /**
+     * 비밀번호 재설정하려 할때 인증 번호 확인 & 비밀번호 변경
+     * @param dto FUserFindPwDto 인증 번호를 담고 있는 객체 (이메일 정보 필수로 저장)
+     * @return 성공 -> 200, 실패 -> 401
+     * @throws LoginException 인증 번호 불일치
+     */
+    @PostMapping("/check-code")
+    public ResponseEntity<?> checkCertifyCode(@RequestBody @Validated FUserFindPwDto dto) throws LoginException{
+        try{
+            fUserService.checkCertify(dto);
 
+            return ResponseEntity.ok(null);
+        }catch (LoginException e){
+            return ResponseEntity.status(401).build();
+        }
+    }
 
-
+    /**
+     * 비밀 번호 재설정
+     * @param dto FUserFindPwDto FUser 의 이메일 정보와 새로운 비밀번호가 저장된 객체
+     * @return 성공 -> 200
+     */
+    @PostMapping("/new-pw")
+    public ResponseEntity<?> updateFUserPassword(@RequestBody @Validated FUserFindPwDto dto){
+        fUserService.updateFUserPw(dto);
+        return ResponseEntity.ok(null);
+    }
 }

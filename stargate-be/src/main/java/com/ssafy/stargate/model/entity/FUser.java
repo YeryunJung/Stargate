@@ -1,9 +1,7 @@
 package com.ssafy.stargate.model.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -37,4 +35,7 @@ public class FUser extends BaseEntity{
 
     @Column(nullable = false)
     private String phone;
+
+    @OneToOne(mappedBy = "fUser")
+    private Certify certify;
 }
