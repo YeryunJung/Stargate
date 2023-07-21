@@ -7,6 +7,7 @@ import com.ssafy.stargate.model.entity.PMember;
 import com.ssafy.stargate.model.entity.PUser;
 import com.ssafy.stargate.model.repository.PGroupRepository;
 import com.ssafy.stargate.model.repository.PMemberRepository;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
