@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+/**
+ * 미팅 팬 유저 브릿지 엔티티
+ */
 @Entity
 @Table(name = "meeting_f_user_bridge")
 @AllArgsConstructor
@@ -14,7 +17,7 @@ import org.hibernate.annotations.ColumnDefault;
 public class MeetingFUserBridge extends BaseEntity {
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.AUTO) // TODO: vs IDENTITY?
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long no;
 
 

@@ -1,7 +1,5 @@
 package com.ssafy.stargate.model.dto.common;
 
-import com.ssafy.stargate.model.entity.MeetingFUserBridge;
-import com.ssafy.stargate.model.entity.MeetingMemberBridge;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -23,7 +21,6 @@ public class MeetingDto {
     private int waitingTime;
     private int meetingTime;
     private String notice;
-    private String image;
     private List<MeetingFUserBridgeDto> meetingFUsers;
     private List<MeetingMemberBridgeDto> meetingMembers;
 }

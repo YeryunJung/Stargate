@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+/**
+ * 미팅 멤버 브릿지 엔티티
+ */
 @Entity
 @Table(name = "meeting_member_bridge")
 @AllArgsConstructor

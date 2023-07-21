@@ -20,7 +20,7 @@ import java.util.HashMap;
 
 /**
  * 팬 유저에 관한 Controller이다.
- * 회원가입, 로그인을 지원한다.
+ * 팬 정보 CRUD 및 로그인을 지원한다.
  */
 @RestController
 @RequestMapping("/fusers")

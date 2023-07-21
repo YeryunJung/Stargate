@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 미팅 엔티티
+ */
 @Entity
 @Table(name = "meeting")
 @AllArgsConstructor
@@ -18,7 +21,7 @@ import java.util.UUID;
 @Getter
 public class Meeting extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false)
     private UUID uuid;
 
@@ -42,12 +45,16 @@ public class Meeting extends BaseEntity {
     @Column
     private String image;
 
-    @OneToMany(mappedBy = "meeting", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "email",referencedColumnName = "email")
+    private PUser pUser;
+
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     @Builder.Default
     private List<MeetingMemberBridge> meetingMembers = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "meeting", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     @Builder.Default
     private List<MeetingFUserBridge> meetingFUsers = new ArrayList<>();
 }
