@@ -18,7 +18,7 @@ interface InputProps {
 const InputComponent: React.FC<InputProps> = ({ type, text, notice }) => {
   return (
     <div className="p-1 m-2">
-      <p className="font-bold text-left text-slate-50">{text}</p>
+      <p className="font-semibold text-left text-slate-50">{text}</p>
       {type == "password" ? (
         <div>
           <input
