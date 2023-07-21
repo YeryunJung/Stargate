@@ -12,7 +12,6 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString
 @Getter
 public class MeetingFUserBridge extends BaseEntity {
     @Id
