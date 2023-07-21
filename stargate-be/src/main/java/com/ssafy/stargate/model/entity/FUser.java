@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @Getter
+@Setter
 public class FUser extends BaseEntity {
     @Id
     @Column
