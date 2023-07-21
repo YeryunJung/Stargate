@@ -1,7 +1,4 @@
 package com.ssafy.stargate.model.dto.common;
-
-import com.ssafy.stargate.model.entity.FUser;
-import com.ssafy.stargate.model.entity.Meeting;
 import lombok.*;
 
 @Builder
@@ -12,7 +9,6 @@ import lombok.*;
 @ToString
 public class MeetingFUserBridgeDto {
     private long no;
-    private FUser fUser;
-    private Meeting meeting;
+    private String email; // FUser
     private int orderNum;
 }

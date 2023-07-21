@@ -1,13 +1,8 @@
 package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.model.dto.common.*;
-import com.ssafy.stargate.model.entity.Meeting;
-import com.ssafy.stargate.model.entity.PGroup;
-import com.ssafy.stargate.model.entity.PMember;
-import com.ssafy.stargate.model.entity.PUser;
-import com.ssafy.stargate.model.repository.FUserRepository;
-import com.ssafy.stargate.model.repository.MeetingRepository;
-import com.ssafy.stargate.model.repository.PMemberRepository;
+import com.ssafy.stargate.model.entity.*;
+import com.ssafy.stargate.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +19,22 @@ public class MeetingServiceImplement implements MeetingService {
     private final MeetingRepository meetingRepository;
 
     @Autowired
-    private final FUserRepository fUserRepository;
+    private final MeetingFUserRepository meetingFUserRepository;
+
+    @Autowired
+    private final MeetingMemberRepository meetingMemberRepository;
 
     @Autowired
     private final PMemberRepository pMemberRepository;
+
+    @Autowired
+    private final FUserRepository fUserRepository;
+
+    /*
+     TODO:
+       - Exceptin 처리
+       - 주석
+     */
 
     @Override
     public MeetingDto create(MeetingDto dto, Principal principal) {
@@ -43,33 +50,44 @@ public class MeetingServiceImplement implements MeetingService {
                 .image(dto.getImage())
                 .build();
 
-//        String email = principal.getName();
-//        log.info("data : {}", dto);
-//        PGroup pGroup = PGroup.builder()
-//                .name(dto.getName())
-//                .pUser(PUser.builder().email(email).build())
-//                .build();
-//        groupRepository.save(pGroup);
-//        List<PMember> newMembers = memberRepository.saveAll(dto.getMembers().stream().map(pMemberDto -> PMember.builder()
-//                .pGroup(pGroup)
-//                .name(pMemberDto.getName())
-//                .build()
-//        ).toList());
-//        return PGroupDto.builder()
-//                .groupNo(pGroup.getGroupNo())
-//                .name(pGroup.getName())
-//                .members(newMembers.stream()
-//                        .map(pMember -> PMemberDto.builder()
-//                                .name(pMember.getName()).
-//                                memberNo(pMember.getMemberNo())
-//                                .build())
-//                        .toList())
-//                .build();
-//        meetingRepository.save(meeting);
-//        dto.setUuid(meeting.getUuid());
-        return dto;
+        meetingRepository.save(meeting);
+
+        List<MeetingMemberBridge> meetingMembers = meetingMemberRepository.saveAll(dto.getMeetingMembers().stream().map(meetingMemberBridgeDto -> MeetingMemberBridge.builder()
+                .meeting(meeting)
+                .pMember(pMemberRepository.findById(meetingMemberBridgeDto.getMemberNo()).get()) // TODO[?] 이게 맞나..?
+                .orderNum(meetingMemberBridgeDto.getOrderNum())
+                .build()).toList());
+
+        List<MeetingFUserBridge> meetingFUsers = meetingFUserRepository.saveAll(dto.getMeetingFUsers().stream().map(meetingFUserBridgeDto -> MeetingFUserBridge.builder()
+                .meeting(meeting)
+                .fUser(fUserRepository.findById(meetingFUserBridgeDto.getEmail()).get()) // TODO[?] 이게 맞나..?
+                .orderNum(meetingFUserBridgeDto.getOrderNum())
+                .build()).toList());
+
+        return MeetingDto.builder()
+                .uuid(meeting.getUuid())
+                .name(meeting.getName())
+                .startDate(meeting.getStartDate())
+                .waitingTime(meeting.getWaitingTime())
+                .meetingTime(meeting.getMeetingTime())
+                .notice(meeting.getNotice())
+                .image(meeting.getImage())
+                .meetingMembers(meetingMembers.stream()
+                        .map(meetingMember -> MeetingMemberBridgeDto.builder()
+                                .no(meetingMember.getNo())
+                                .memberNo(meetingMember.getPMember().getMemberNo())
+                                .orderNum(meetingMember.getOrderNum())
+                                .build()).toList())
+                .meetingFUsers(meetingFUsers.stream()
+                        .map(meetingFUser -> MeetingFUserBridgeDto.builder()
+                                .no(meetingFUser.getNo())
+                                .email(meetingFUser.getFUser().getEmail())
+                                .orderNum(meetingFUser.getOrderNum())
+                                .build()).toList())
+                .build();
     }
 
+    /*
     @Override
     public MeetingMemberBridgeDto createMeetingMember(MeetingMemberBridgeDto dto, Principal principal) {
         return null;
@@ -79,26 +97,5 @@ public class MeetingServiceImplement implements MeetingService {
     public MeetingFUserBridgeDto createMeetingFUser(MeetingFUserBridgeDto dto, Principal principal) {
         return null;
     }
-//
-//    public Meeting createMeetingWithMembersAndFans(Meeting meeting, List<FUser> fans, List<PMember> members) {
-//        Meeting savedMeeting = meetingRepository.save(meeting);
-//
-//        for (FUser fan : fans) {
-//            MeetingFanBridge meetingFanBridge = MeetingFanBridge.builder()
-//                    .fUser(fan)
-//                    .meeting(savedMeeting)
-//                    .build();
-//            savedMeeting.getFUsers().add(meetingFanBridge);
-//        }
-//
-//        for (PMember member : members) {
-//            MeetingMemberBridge meetingMemberBridge = MeetingMemberBridge.builder()
-//                    .pMember(member)
-//                    .meeting(savedMeeting)
-//                    .build();
-//            savedMeeting.getMembers().add(meetingMemberBridge);
-//        }
-//
-//        return savedMeeting;
-//    }
+     */
 }

@@ -9,7 +9,8 @@ import java.security.Principal;
 public interface MeetingService {
     public MeetingDto create(MeetingDto dto, Principal principal);
 
+    /*
     MeetingMemberBridgeDto createMeetingMember(MeetingMemberBridgeDto dto, Principal principal);
-
     MeetingFUserBridgeDto createMeetingFUser(MeetingFUserBridgeDto dto, Principal principal);
+     */
 }

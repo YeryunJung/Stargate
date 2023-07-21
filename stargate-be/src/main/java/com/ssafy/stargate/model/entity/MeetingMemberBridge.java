@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
-import java.lang.reflect.Member;
-import java.util.UUID;
-
 @Entity
 @Table(name = "meeting_member_bridge")
 @AllArgsConstructor

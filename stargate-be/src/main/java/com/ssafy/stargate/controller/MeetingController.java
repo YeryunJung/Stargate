@@ -27,6 +27,7 @@ public class MeetingController {
         return ResponseEntity.status(201).body(meeting);
     }
 
+    /*
     // TODO: API 작성하기
     // TODO: Json vs Form?
     @PostMapping("/member/create") // TODO: vs members?
@@ -41,5 +42,5 @@ public class MeetingController {
         MeetingFUserBridgeDto meetingFUser = meetingService.createMeetingFUser(dto, principal);
         return ResponseEntity.ok(meetingFUser);
     }
-
+*/
 }

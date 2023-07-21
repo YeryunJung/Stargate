@@ -24,6 +24,6 @@ public class MeetingDto {
     private int meetingTime;
     private String notice;
     private String image;
-    private List<MeetingMemberBridge> members;
-    private List<MeetingFUserBridge> fUsers;
+    private List<MeetingFUserBridgeDto> meetingFUsers;
+    private List<MeetingMemberBridgeDto> meetingMembers;
 }

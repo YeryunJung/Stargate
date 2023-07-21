@@ -18,8 +18,7 @@ import java.util.UUID;
 @ToString
 public class MeetingMemberBridgeDto {
     private long no;
-    private PMember pMember;
-    private Meeting meeting;
+    private long memberNo; // PMember
     private int orderNum;
 
 }
