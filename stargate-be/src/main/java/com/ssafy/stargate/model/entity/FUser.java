@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @ToString
 @Getter
 @Setter
-public class FUser extends BaseEntity{
+public class FUser extends BaseEntity {
     @Id
     @Column
     private String email;
