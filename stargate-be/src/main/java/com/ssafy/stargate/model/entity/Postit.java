@@ -19,15 +19,15 @@ public class Postit extends BaseEntity{
     @Column(name = "content")
     private String contents;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "email", referencedColumnName = "email")
     private FUser fUser;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "memberNo", referencedColumnName = "member_no")
     private PMember pMember;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "uuid", referencedColumnName = "uuid")
     private Meeting meeting;
 
