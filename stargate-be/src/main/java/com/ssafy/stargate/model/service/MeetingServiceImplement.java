@@ -11,17 +11,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /*
 TODO
- - Exception 추가하기
- - 테스트 해보기
- - API 수정하기
- - 방송 UID 만드는 부분 / 보내는 부분 추가
- - getMeeting에 유저상태 정보 추가
+ - [] Exception 추가하기
+ - [] 테스트 해보기
+ - [o] API 수정하기
+ - [] API 수정한대로 수정
+ - [] 방송 UID 만드는 부분 / 보내는 부분 추가
+ - [] getMeeting에 유저상태 정보 추가
+ - [o] user 관련 수정
+ - [] Multipart로 이미지 받아서 저장해보기
  */
+
 /**
  * 미팅 관련 서비스 구현체
  */
@@ -43,10 +49,6 @@ public class MeetingServiceImplement implements MeetingService {
 
     @Autowired
     private final PUserRepository pUserRepository;
-
-    @Autowired
-    private final FUserRepository fUserRepository;
-
 
     @Override
     public List<MeetingDto> getMeetingList(MeetingDto dto, Principal principal) {
@@ -103,7 +105,7 @@ public class MeetingServiceImplement implements MeetingService {
 
             List<MeetingFUserBridge> meetingFUsers = meetingFUserRepository.saveAll(dto.getMeetingFUsers().stream().map(meetingFUserBridgeDto -> MeetingFUserBridge.builder()
                     .meeting(meeting)
-                    .fUser(fUserRepository.findById(meetingFUserBridgeDto.getEmail()).get())
+                    .email(meetingFUserBridgeDto.getEmail())
                     .orderNum(meetingFUserBridgeDto.getOrderNum())
                     .build()).toList());
 
@@ -131,25 +133,22 @@ public class MeetingServiceImplement implements MeetingService {
         meeting.setMeetingTime(dto.getMeetingTime());
         meeting.setNotice(dto.getNotice());
 
-        // TODO: 더 좋은 방법이 있을까?
-        /* TODO: 에러 발생. 해결하기!!
-            2023-07-21T17:48:19.998+09:00 ERROR 2620 --- [nio-8080-exec-1] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.UnsupportedOperationException] with root cause
-            java.lang.UnsupportedOperationException: null
-            	at java.base/java.util.ImmutableCollections.uoe(ImmutableCollections.java:142) ~[na:na]
-         */
-        List<MeetingMemberBridge> meetingMembers = dto.getMeetingMembers().stream().map(meetingMemberBridgeDto -> MeetingMemberBridge.builder()
+        List<MeetingMemberBridge> meetingMembers = meeting.getMeetingMembers();
+        List<MeetingMemberBridge> newMeetingMembers = dto.getMeetingMembers().stream().map(meetingMemberBridgeDto -> MeetingMemberBridge.builder()
+                .meeting(meeting)
                 .pMember(pMemberRepository.findById(meetingMemberBridgeDto.getMemberNo()).get())
                 .orderNum(meetingMemberBridgeDto.getOrderNum())
                 .build()).toList();
+        updateMeetingMemberList(meetingMembers, newMeetingMembers);
 
-        List<MeetingFUserBridge> meetingFUsers = dto.getMeetingFUsers().stream().map(meetingFUserBridgeDto -> MeetingFUserBridge.builder()
-                .fUser(fUserRepository.findById(meetingFUserBridgeDto.getEmail()).get())
+        List<MeetingFUserBridge> meetingFUsers = meeting.getMeetingFUsers();
+        List<MeetingFUserBridge> newMeetingFUsers = dto.getMeetingFUsers().stream().map(meetingFUserBridgeDto -> MeetingFUserBridge.builder()
+                .meeting(meeting)
+                .email(meetingFUserBridgeDto.getEmail())
                 .orderNum(meetingFUserBridgeDto.getOrderNum())
                 .build()).toList();
+        updateMeetingFUserList(meetingFUsers, newMeetingFUsers);
 
-        meeting.setMeetingMembers(meetingMembers);
-        meeting.setMeetingFUsers(meetingFUsers);
-        meetingRepository.save(meeting);
     }
 
     @Transactional
@@ -161,7 +160,7 @@ public class MeetingServiceImplement implements MeetingService {
     }
 
 
-    public MeetingDto entityToDtoMeeting(Meeting meeting) {
+    private MeetingDto entityToDtoMeeting(Meeting meeting) {
         return MeetingDto.builder()
                 .uuid(meeting.getUuid())
                 .name(meeting.getName())
@@ -174,7 +173,7 @@ public class MeetingServiceImplement implements MeetingService {
                 .build();
     }
 
-    public List<MeetingMemberBridgeDto> entityToDtoMeetingMemberList(List<MeetingMemberBridge> meetingMembers) {
+    private List<MeetingMemberBridgeDto> entityToDtoMeetingMemberList(List<MeetingMemberBridge> meetingMembers) {
         return meetingMembers.stream()
                 .map(meetingMember -> MeetingMemberBridgeDto.builder()
                         .no(meetingMember.getNo())
@@ -183,12 +182,84 @@ public class MeetingServiceImplement implements MeetingService {
                         .build()).toList();
     }
 
-    public List<MeetingFUserBridgeDto> entityToDtoMeetingFUserList(List<MeetingFUserBridge> meetingFUsers) {
+    private List<MeetingFUserBridgeDto> entityToDtoMeetingFUserList(List<MeetingFUserBridge> meetingFUsers) {
         return meetingFUsers.stream()
                 .map(meetingFUser -> MeetingFUserBridgeDto.builder()
                         .no(meetingFUser.getNo())
-                        .email(meetingFUser.getFUser().getEmail())
+                        .email(meetingFUser.getEmail())
                         .orderNum(meetingFUser.getOrderNum())
                         .build()).toList();
+    }
+
+    public void updateMeetingMemberList(List<MeetingMemberBridge> source, List<MeetingMemberBridge> target) {
+        // create or update (target)
+        for (MeetingMemberBridge tg : target) {
+            Optional<MeetingMemberBridge> meetingMemberOptional = source.stream()
+                    .filter(org -> org.getPMember().getMemberNo() == tg.getPMember().getMemberNo())
+                    .findFirst();
+
+            if (meetingMemberOptional.isPresent()) {
+                MeetingMemberBridge meetingMember = meetingMemberOptional.get();
+                // update source
+                meetingMember.setOrderNum(tg.getOrderNum());
+                meetingMemberRepository.save(meetingMember);
+            } else {
+                // create target
+                meetingMemberRepository.save(tg);
+            }
+        }
+
+        // delete (source)
+        Iterator<MeetingMemberBridge> iterator = source.iterator();
+        while (iterator.hasNext()) {
+            MeetingMemberBridge src = iterator.next();
+            boolean isExist = false;
+            for (MeetingMemberBridge tg : target) {
+                if (src.getPMember().getMemberNo() == tg.getPMember().getMemberNo()) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if (!isExist) {
+                meetingMemberRepository.deleteById(src.getNo());
+                iterator.remove();
+            }
+        }
+    }
+
+    public void updateMeetingFUserList(List<MeetingFUserBridge> source, List<MeetingFUserBridge> target) {
+        // create or update (target)
+        for (MeetingFUserBridge tg : target) {
+            Optional<MeetingFUserBridge> meetingFUserOptional = source.stream()
+                    .filter(org -> org.getEmail().equals(tg.getEmail()))
+                    .findFirst();
+
+            if (meetingFUserOptional.isPresent()) {
+                MeetingFUserBridge meetingFuser = meetingFUserOptional.get();
+                // update source
+                meetingFuser.setOrderNum(tg.getOrderNum());
+                meetingFUserRepository.save(meetingFuser);
+            } else {
+                // create target
+                meetingFUserRepository.save(tg);
+            }
+        }
+
+        // delete (source)
+        Iterator<MeetingFUserBridge> iterator = source.iterator();
+        while (iterator.hasNext()) {
+            MeetingFUserBridge src = iterator.next();
+            boolean isExist = false;
+            for (MeetingFUserBridge tg : target) {
+                if (src.getEmail().equals(tg.getEmail())) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if (!isExist) {
+                meetingFUserRepository.deleteById(src.getNo());
+                iterator.remove();
+            }
+        }
     }
 }

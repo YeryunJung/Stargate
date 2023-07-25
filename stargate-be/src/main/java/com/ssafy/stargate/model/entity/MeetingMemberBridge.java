@@ -13,15 +13,15 @@ import org.hibernate.annotations.ColumnDefault;
 @NoArgsConstructor
 @Builder
 @Getter
+@Setter
 public class MeetingMemberBridge extends BaseEntity {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long no;
 
-
     @ManyToOne
-    @JoinColumn(name="p_member.email")
+    @JoinColumn(name="p_member.no")
     private PMember pMember;
 
     @ManyToOne
