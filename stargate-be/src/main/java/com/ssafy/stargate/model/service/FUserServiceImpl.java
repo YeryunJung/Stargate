@@ -51,6 +51,7 @@ public class FUserServiceImpl implements FUserService {
     @Autowired
     private JwtTokenRepository jwtTokenRepository;
 
+
     /**
      * 팬 유저 회원가입을 진행한다.
      *
@@ -160,7 +161,6 @@ public class FUserServiceImpl implements FUserService {
      */
     @Override
     public void deleteFUser(Principal principal) {
-
         fUserRepository.deleteById(principal.getName());
         jwtTokenRepository.deleteById(principal.getName());
     }
@@ -200,6 +200,7 @@ public class FUserServiceImpl implements FUserService {
         FUser fUser = fUserRepository.findById(dto.getEmail()).orElseThrow();
 
         log.info("이메일로 찾은 회원 정보 {}", fUser.getEmail());
+
 
         if(fUser != null){
             String certify = RandomStringUtils.randomNumeric(10);
@@ -252,12 +253,12 @@ public class FUserServiceImpl implements FUserService {
 
         fUserRepository.save(fUser);
 
-
         Certify certify = certifyRepository.findByfUserEmail(dto.getEmail());
 
         if(certify != null){
             certifyRepository.delete(certify);
         }
+
     }
 }
 
