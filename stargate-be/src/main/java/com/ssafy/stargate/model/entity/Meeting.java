@@ -18,6 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Getter
+@Setter
 public class Meeting extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,8 +42,12 @@ public class Meeting extends BaseEntity {
     @Column
     private String notice;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int photoNum;
+
     @Column
-    private String image;
+    private String image; // TODO: multipart로 Testing해보기
 
     @ManyToOne
     @JoinColumn(name = "email",referencedColumnName = "email")
@@ -56,4 +61,7 @@ public class Meeting extends BaseEntity {
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
     @Builder.Default
     private List<MeetingFUserBridge> meetingFUsers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "meeting")
+    private List<Letter> letters = new ArrayList<>();
 }

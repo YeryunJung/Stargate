@@ -1,21 +1,20 @@
 package com.ssafy.stargate.exception;
 
 /**
- * JWT 토큰 관련 에러
+ * 데이터베이스 CRUD 기능 실패 시 던지는 에러이다.
+ * [Status: 600]
  */
-public class InvalidTokenException extends BaseException{
-
-
+public class CRUDException extends BaseException {
     private final String message;
 
-    public InvalidTokenException(String message){
+    public CRUDException(String message) {
         super(message);
         this.message = message;
     }
 
     @Override
     public int getStatus() {
-        return 601;
+        return 600;
     }
 
     @Override
