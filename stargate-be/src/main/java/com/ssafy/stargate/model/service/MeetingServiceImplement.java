@@ -1,7 +1,9 @@
 package com.ssafy.stargate.model.service;
 
-import com.ssafy.stargate.exception.SaveException;
+import com.ssafy.stargate.exception.NotFoundException;
+import com.ssafy.stargate.exception.CRUDException;
 import com.ssafy.stargate.model.dto.common.*;
+import com.ssafy.stargate.model.dto.response.MeetingDetailResponseDto;
 import com.ssafy.stargate.model.entity.*;
 import com.ssafy.stargate.model.repository.*;
 import jakarta.transaction.Transactional;
@@ -17,15 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /*
-TODO
- - [] Exception 추가하기
- - [] 테스트 해보기
- - [o] API 수정하기
- - [] API 수정한대로 수정
- - [] 방송 UID 만드는 부분 / 보내는 부분 추가
- - [] getMeeting에 유저상태 정보 추가
- - [o] user 관련 수정
- - [] Multipart로 이미지 받아서 저장해보기
+TODO: Multipart로 이미지 받아오기
  */
 
 /**
@@ -50,40 +44,70 @@ public class MeetingServiceImplement implements MeetingService {
     @Autowired
     private final PUserRepository pUserRepository;
 
-    @Override
-    public List<MeetingDto> getMeetingList(MeetingDto dto, Principal principal) {
-        log.info("data : {}", dto);
-        String email = principal.getName();
+    @Autowired
+    private final FUserRepository fUserRepository;
 
-        List<Meeting> meetings = meetingRepository.findAllByEmail(email);
-        return meetings.stream().map((meeting -> MeetingDto.builder()
-                        .uuid(meeting.getUuid())
-                        .name(meeting.getName())
-                        .startDate(meeting.getStartDate())
-                        .build()
-                ))
-                .toList();
-    }
-
+    /**
+     * 미팅 세부정보를 가져온다.
+     * ResponseDto에는 기본 정보에 미팅방 ID(roomId), 팬유저 가입 여부(isRegister)가 추가적으로 들어간다.
+     * 맴버 미팅방 ID(roomId) 포멧 (String): {미팅UUID}.{유저UUID}
+     * 팬유저 가입 여부: 팬 유저 이메일이 DB에 존재하는지 확인
+     * @param uuid [UUID] 미팅 UUID
+     * @param principal [Principal] 소속사 email이 포함된 principal 객체
+     * @return [MeetingDetailResponseDto] 기본 정보 + 맴버 미팅방 ID, 유저 가입 여부를 포함한 DTO
+     * @throws NotFoundException 데이터 찾기 실패 에러
+     */
     @Override
-    public MeetingDto getMeeting(UUID uuid, Principal principal) {
+    public MeetingDetailResponseDto getMeeting(UUID uuid, Principal principal) throws NotFoundException {
         log.info("data : {}", uuid);
         String email = principal.getName();
 
-        Meeting meeting = meetingRepository.findByIdAndEmail(uuid, email);
-        return entityToDtoMeeting(meeting);
+        Meeting meeting = meetingRepository.findByIdAndEmail(uuid, email)
+                .orElseThrow(() -> new NotFoundException("미팅 존재하지 않음"));
+
+        List<MeetingDetailResponseDto.MeetingMember> meetingMemberDtos = (List<MeetingDetailResponseDto.MeetingMember>) meeting.getMeetingMembers()
+                .stream()
+                .map(meetingMember -> MeetingDetailResponseDto.MeetingMember.builder()
+                        .uuid(meetingMember.getUuid())
+                        .memberNo(meetingMember.getPMember().getMemberNo())
+                        .orderNum(meetingMember.getOrderNum())
+                        .roomId(meeting.getUuid() + "." + meetingMember.getUuid()) // create roomId
+                        .build()).toList();
+
+
+        List<MeetingDetailResponseDto.MeetingFUser> meetingFUserDtos = (List<MeetingDetailResponseDto.MeetingFUser>) meeting.getMeetingFUsers()
+                .stream()
+                .map(meetingFUser -> MeetingDetailResponseDto.MeetingFUser.builder()
+                        .no(meetingFUser.getNo())
+                        .email(meetingFUser.getEmail())
+                        .orderNum(meetingFUser.getOrderNum())
+                        .isRegister(fUserRepository.existsById(meetingFUser.getEmail()))
+                        .build()).toList();
+
+        return MeetingDetailResponseDto.builder()
+                .uuid(meeting.getUuid())
+                .name(meeting.getName())
+                .startDate(meeting.getStartDate())
+                .waitingTime(meeting.getWaitingTime())
+                .meetingTime(meeting.getMeetingTime())
+                .notice(meeting.getNotice())
+                .photoNum(meeting.getPhotoNum())
+                .meetingMembers(meetingMemberDtos)
+                .meetingFUsers(meetingFUserDtos)
+                .build();
     }
 
     /**
-     * 신규 meeting을 생성한다.
-     *
-     * @param dto       [MeetingDto] 입력받은 meeting dto
+     * 신규 미팅을 생성한다.
+     * @param dto       [MeetingDto] 입력받은 Meeting DTO
      * @param principal [Principal] 소속사 이메일이 포함된 객체
-     * @return [MeetingDto] 생성한 미팅 정보를 담은 dto
+     * @return [MeetingDto] 생성한 미팅 정보를 담은 DTO
+     * @throws CRUDException 데이터 CRUD 에러
+     * @throws NotFoundException 데이터 찾기 실패 에러
      */
     @Transactional
     @Override
-    public MeetingDto createMeeting(MeetingDto dto, Principal principal) throws SaveException {
+    public MeetingDto createMeeting(MeetingDto dto, Principal principal) throws CRUDException, NotFoundException {
         log.info("data : {}", dto);
         String email = principal.getName();
 
@@ -94,12 +118,15 @@ public class MeetingServiceImplement implements MeetingService {
                     .waitingTime(dto.getWaitingTime())
                     .meetingTime(dto.getMeetingTime())
                     .notice(dto.getNotice())
-                    .pUser(pUserRepository.findById(email).get())
+                    .photoNum(dto.getPhotoNum())
+                    .pUser(pUserRepository.findById(email)
+                            .orElseThrow(() -> new NotFoundException("소속사가 존재하지 않습니다.")))
                     .build();
 
             List<MeetingMemberBridge> meetingMembers = meetingMemberRepository.saveAll(dto.getMeetingMembers().stream().map(meetingMemberBridgeDto -> MeetingMemberBridge.builder()
                     .meeting(meeting)
-                    .pMember(pMemberRepository.findById(meetingMemberBridgeDto.getMemberNo()).get())
+                    .pMember(pMemberRepository.findById(meetingMemberBridgeDto.getMemberNo())
+                            .orElseThrow(() -> new NotFoundException("미팅 멤버가 존재하지 않습니다.")))
                     .orderNum(meetingMemberBridgeDto.getOrderNum())
                     .build()).toList());
 
@@ -114,152 +141,180 @@ public class MeetingServiceImplement implements MeetingService {
 
             meetingRepository.save(meeting);
 
-            return entityToDtoMeeting(meeting);
+            return MeetingDto.entityToDto(meeting);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new SaveException("미팅 생성 도중 오류가 발생했습니다.");
+            throw new CRUDException("미팅 생성 도중 오류가 발생했습니다.");
         }
     }
 
+    /**
+     * 미팅 정보를 수정한다.
+     * @param dto [MeetingDto] 입력받은 Meeting DTO
+     * @param principal [Principal] 소속사 이메일이 포함된 객체
+     * @throws CRUDException 데이터 CRUD 에러
+     * @throws NotFoundException 데이터 찾기 실패 에러
+     */
     @Transactional
     @Override
-    public void updateMeeting(MeetingDto dto, Principal principal) {
+    public void updateMeeting(MeetingDto dto, Principal principal) throws CRUDException, NotFoundException {
         log.info("data : {}", dto);
         String email = principal.getName();
-        Meeting meeting = meetingRepository.findByIdAndEmail(dto.getUuid(), email);
-        meeting.setName(dto.getName());
-        meeting.setStartDate(dto.getStartDate());
-        meeting.setWaitingTime(dto.getWaitingTime());
-        meeting.setMeetingTime(dto.getMeetingTime());
-        meeting.setNotice(dto.getNotice());
+        try {
+            Meeting meeting = meetingRepository.findByIdAndEmail(dto.getUuid(), email)
+                    .orElseThrow(() -> new NotFoundException("미팅이 존재하지 않습니다."));
+            meeting.setName(dto.getName());
+            meeting.setStartDate(dto.getStartDate());
+            meeting.setWaitingTime(dto.getWaitingTime());
+            meeting.setMeetingTime(dto.getMeetingTime());
+            meeting.setPhotoNum(dto.getPhotoNum());
+            meeting.setNotice(dto.getNotice());
 
-        List<MeetingMemberBridge> meetingMembers = meeting.getMeetingMembers();
-        List<MeetingMemberBridge> newMeetingMembers = dto.getMeetingMembers().stream().map(meetingMemberBridgeDto -> MeetingMemberBridge.builder()
-                .meeting(meeting)
-                .pMember(pMemberRepository.findById(meetingMemberBridgeDto.getMemberNo()).get())
-                .orderNum(meetingMemberBridgeDto.getOrderNum())
-                .build()).toList();
-        updateMeetingMemberList(meetingMembers, newMeetingMembers);
+            List<MeetingMemberBridge> meetingMembers = meeting.getMeetingMembers();
+            List<MeetingMemberBridge> newMeetingMembers = dto.getMeetingMembers().stream().map(meetingMemberBridgeDto -> MeetingMemberBridge.builder()
+                    .meeting(meeting)
+                    .pMember(pMemberRepository.findById(meetingMemberBridgeDto.getMemberNo())
+                            .orElseThrow(() -> new NotFoundException("미팅 멤버가 존재하지 않습니다.")))
+                    .orderNum(meetingMemberBridgeDto.getOrderNum())
+                    .build()).toList();
+            updateMeetingMemberList(meetingMembers, newMeetingMembers);
 
-        List<MeetingFUserBridge> meetingFUsers = meeting.getMeetingFUsers();
-        List<MeetingFUserBridge> newMeetingFUsers = dto.getMeetingFUsers().stream().map(meetingFUserBridgeDto -> MeetingFUserBridge.builder()
-                .meeting(meeting)
-                .email(meetingFUserBridgeDto.getEmail())
-                .orderNum(meetingFUserBridgeDto.getOrderNum())
-                .build()).toList();
-        updateMeetingFUserList(meetingFUsers, newMeetingFUsers);
-
-    }
-
-    @Transactional
-    @Override
-    public void deleteMeeting(MeetingDto dto, Principal principal) {
-        log.info("data : {}", dto);
-        String email = principal.getName();
-        meetingRepository.deleteByIdAndEmail(dto.getUuid(), email);
-    }
-
-
-    private MeetingDto entityToDtoMeeting(Meeting meeting) {
-        return MeetingDto.builder()
-                .uuid(meeting.getUuid())
-                .name(meeting.getName())
-                .startDate(meeting.getStartDate())
-                .waitingTime(meeting.getWaitingTime())
-                .meetingTime(meeting.getMeetingTime())
-                .notice(meeting.getNotice())
-                .meetingMembers(entityToDtoMeetingMemberList(meeting.getMeetingMembers()))
-                .meetingFUsers(entityToDtoMeetingFUserList(meeting.getMeetingFUsers()))
-                .build();
-    }
-
-    private List<MeetingMemberBridgeDto> entityToDtoMeetingMemberList(List<MeetingMemberBridge> meetingMembers) {
-        return meetingMembers.stream()
-                .map(meetingMember -> MeetingMemberBridgeDto.builder()
-                        .no(meetingMember.getNo())
-                        .memberNo(meetingMember.getPMember().getMemberNo())
-                        .orderNum(meetingMember.getOrderNum())
-                        .build()).toList();
-    }
-
-    private List<MeetingFUserBridgeDto> entityToDtoMeetingFUserList(List<MeetingFUserBridge> meetingFUsers) {
-        return meetingFUsers.stream()
-                .map(meetingFUser -> MeetingFUserBridgeDto.builder()
-                        .no(meetingFUser.getNo())
-                        .email(meetingFUser.getEmail())
-                        .orderNum(meetingFUser.getOrderNum())
-                        .build()).toList();
-    }
-
-    public void updateMeetingMemberList(List<MeetingMemberBridge> source, List<MeetingMemberBridge> target) {
-        // create or update (target)
-        for (MeetingMemberBridge tg : target) {
-            Optional<MeetingMemberBridge> meetingMemberOptional = source.stream()
-                    .filter(org -> org.getPMember().getMemberNo() == tg.getPMember().getMemberNo())
-                    .findFirst();
-
-            if (meetingMemberOptional.isPresent()) {
-                MeetingMemberBridge meetingMember = meetingMemberOptional.get();
-                // update source
-                meetingMember.setOrderNum(tg.getOrderNum());
-                meetingMemberRepository.save(meetingMember);
-            } else {
-                // create target
-                meetingMemberRepository.save(tg);
-            }
+            List<MeetingFUserBridge> meetingFUsers = meeting.getMeetingFUsers();
+            List<MeetingFUserBridge> newMeetingFUsers = dto.getMeetingFUsers().stream().map(meetingFUserBridgeDto -> MeetingFUserBridge.builder()
+                    .meeting(meeting)
+                    .email(meetingFUserBridgeDto.getEmail())
+                    .orderNum(meetingFUserBridgeDto.getOrderNum())
+                    .build()).toList();
+            updateMeetingFUserList(meetingFUsers, newMeetingFUsers);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CRUDException("미팅 수정 도중 오류가 발생했습니다.");
         }
 
-        // delete (source)
-        Iterator<MeetingMemberBridge> iterator = source.iterator();
-        while (iterator.hasNext()) {
-            MeetingMemberBridge src = iterator.next();
-            boolean isExist = false;
+    }
+
+    /**
+     * 미팅을 삭제한다.
+     * @param dto [MeetingDto] 입력받은 Meeting DTO
+     * @param principal [Principal] 소속사 이메일이 포함된 객체
+     * @throws CRUDException 데이터 CRUD 에러
+     * @throws NotFoundException 데이터 찾기 실패 에러
+     */
+    @Transactional
+    @Override
+    public void deleteMeeting(MeetingDto dto, Principal principal) throws CRUDException, NotFoundException {
+        log.info("data : {}", dto);
+        String email = principal.getName();
+        try {
+            meetingRepository.delete(meetingRepository.findByIdAndEmail(dto.getUuid(), email)
+                    .orElseThrow(() -> new NotFoundException("미팅이 존재하지 않습니다.")));
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CRUDException("미팅 삭제 도중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * 미팅 멤버 리스트를 수정한다.
+     * 기존과 수정할 데이터의 멤버 id(no)를 비교하여,
+     *  - 동일한 멤버: 미팅 멤버 데이터 수정
+     *  - 수정할 데이터에만 있는 멤버: 해당 미팅 멤버 데이터 생성
+     *  - 기존 데이터에만 있는 멤버: 해당 미팅 멤버 데이터 삭제
+     *  를 진행한다.
+     * @param source [List<MeetingMemberBridge>] 기존 데이터 리스트
+     * @param target [List<MeetingMemberBridge>] 수정할 데이터 리스트
+     * @throws CRUDException 데이터 CRUD 에러
+     */
+    private void updateMeetingMemberList(List<MeetingMemberBridge> source, List<MeetingMemberBridge> target) throws CRUDException {
+        try {
+            // create or update (target)
             for (MeetingMemberBridge tg : target) {
-                if (src.getPMember().getMemberNo() == tg.getPMember().getMemberNo()) {
-                    isExist = true;
-                    break;
+                Optional<MeetingMemberBridge> meetingMemberOptional = source.stream()
+                        .filter(org -> org.getPMember().getMemberNo() == tg.getPMember().getMemberNo())
+                        .findFirst();
+
+                if (meetingMemberOptional.isPresent()) {
+                    MeetingMemberBridge meetingMember = meetingMemberOptional.get();
+                    // update source
+                    meetingMember.setOrderNum(tg.getOrderNum());
+                    meetingMemberRepository.save(meetingMember);
+                } else {
+                    // create target
+                    meetingMemberRepository.save(tg);
                 }
             }
-            if (!isExist) {
-                meetingMemberRepository.deleteById(src.getNo());
-                iterator.remove();
+
+            // delete (source)
+            Iterator<MeetingMemberBridge> iterator = source.iterator();
+            while (iterator.hasNext()) {
+                MeetingMemberBridge src = iterator.next();
+                boolean isExist = false;
+                for (MeetingMemberBridge tg : target) {
+                    if (src.getPMember().getMemberNo() == tg.getPMember().getMemberNo()) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    meetingMemberRepository.deleteById(src.getUuid());
+                    iterator.remove();
+                }
             }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CRUDException("미팅 수정(멤버 미팅 수정) 도중 오류가 발생했습니다.");
         }
     }
 
-    public void updateMeetingFUserList(List<MeetingFUserBridge> source, List<MeetingFUserBridge> target) {
-        // create or update (target)
-        for (MeetingFUserBridge tg : target) {
-            Optional<MeetingFUserBridge> meetingFUserOptional = source.stream()
-                    .filter(org -> org.getEmail().equals(tg.getEmail()))
-                    .findFirst();
-
-            if (meetingFUserOptional.isPresent()) {
-                MeetingFUserBridge meetingFuser = meetingFUserOptional.get();
-                // update source
-                meetingFuser.setOrderNum(tg.getOrderNum());
-                meetingFUserRepository.save(meetingFuser);
-            } else {
-                // create target
-                meetingFUserRepository.save(tg);
-            }
-        }
-
-        // delete (source)
-        Iterator<MeetingFUserBridge> iterator = source.iterator();
-        while (iterator.hasNext()) {
-            MeetingFUserBridge src = iterator.next();
-            boolean isExist = false;
+    /**
+     * 팬유저 리스트를 수정한다.
+     * 기존과 수정할 데이터의 팬유저 id(email)를 비교하여,
+     *  - 동일한 팬유저: 미팅 팬유저 데이터 수정
+     *  - 수정할 데이터에만 있는 팬유저: 해당 미팅 팬유저 데이터 생성
+     *  - 기존 데이터에만 있는 팬유저: 해당 미팅 팬유저 데이터 삭제
+     *  를 진행한다.
+     * @param source [List<MeetingMemberBridge>] 기존 데이터 리스트
+     * @param target [List<MeetingMemberBridge>] 수정할 데이터 리스트
+     * @throws CRUDException 데이터 CRUD 에러
+     */
+    private void updateMeetingFUserList(List<MeetingFUserBridge> source, List<MeetingFUserBridge> target) throws CRUDException {
+        try {
+            // create or update (target)
             for (MeetingFUserBridge tg : target) {
-                if (src.getEmail().equals(tg.getEmail())) {
-                    isExist = true;
-                    break;
+                Optional<MeetingFUserBridge> meetingFUserOptional = source.stream()
+                        .filter(org -> org.getEmail().equals(tg.getEmail()))
+                        .findFirst();
+
+                if (meetingFUserOptional.isPresent()) {
+                    MeetingFUserBridge meetingFuser = meetingFUserOptional.get();
+                    // update source
+                    meetingFuser.setOrderNum(tg.getOrderNum());
+                    meetingFUserRepository.save(meetingFuser);
+                } else {
+                    // create target
+                    meetingFUserRepository.save(tg);
                 }
             }
-            if (!isExist) {
-                meetingFUserRepository.deleteById(src.getNo());
-                iterator.remove();
+
+            // delete (source)
+            Iterator<MeetingFUserBridge> iterator = source.iterator();
+            while (iterator.hasNext()) {
+                MeetingFUserBridge src = iterator.next();
+                boolean isExist = false;
+                for (MeetingFUserBridge tg : target) {
+                    if (src.getEmail().equals(tg.getEmail())) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    meetingFUserRepository.deleteById(src.getNo());
+                    iterator.remove();
+                }
             }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new CRUDException("미팅 수정(유저 미팅 수정) 도중 오류가 발생했습니다.");
         }
     }
 }

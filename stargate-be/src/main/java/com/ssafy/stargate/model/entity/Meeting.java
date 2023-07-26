@@ -42,8 +42,12 @@ public class Meeting extends BaseEntity {
     @Column
     private String notice;
 
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private int photoNum;
+
     @Column
-    private String image;
+    private String image; // TODO: multipart로 Testing해보기
 
     @ManyToOne
     @JoinColumn(name = "email",referencedColumnName = "email")

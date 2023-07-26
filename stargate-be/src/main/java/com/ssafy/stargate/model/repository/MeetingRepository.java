@@ -11,17 +11,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface MeetingRepository extends JpaRepository<Meeting, UUID> {
     @Query("SELECT m FROM Meeting m WHERE m.pUser.email = :email ")
-    List<Meeting> findAllByEmail(@Param("email") String email);
+    Optional<List<Meeting>> findAllByEmail(@Param("email") String email);
 
     @Query("SELECT m FROM Meeting m WHERE m.uuid = :uuid AND m.pUser.email = :email")
-    Meeting findByIdAndEmail(@Param("uuid") UUID uuid, @Param("email") String email);
-
-    @Modifying
-    @Query("DELETE from Meeting m where m.uuid = :uuid AND m.pUser.email = :email")
-    void deleteByIdAndEmail(@Param("uuid") UUID uuid, @Param("email") String email);
+    Optional<Meeting> findByIdAndEmail(@Param("uuid") UUID uuid, @Param("email") String email);
 }
