@@ -4,6 +4,8 @@ import com.ssafy.stargate.exception.LetterException;
 import com.ssafy.stargate.model.dto.common.LetterDto;
 import com.ssafy.stargate.model.dto.request.LetterCreateRequestDto;
 import com.ssafy.stargate.model.dto.request.LetterDeleteRequestDto;
+import com.ssafy.stargate.model.dto.request.LetterFindRequestDto;
+import com.ssafy.stargate.model.dto.request.LetterUpdateRequestDto;
 import com.ssafy.stargate.model.entity.Letter;
 
 import java.util.List;
@@ -16,15 +18,15 @@ public interface LetterService {
 
     public LetterDto createLetter(LetterCreateRequestDto dto);
 
-    public LetterDto updateLetter(LetterDto dto) throws LetterException;
+    public LetterDto updateLetter(LetterUpdateRequestDto dto) throws LetterException;
 
     public void deleteLetter(LetterDeleteRequestDto dto) throws LetterException;
 
     public LetterDto getLetter(Long no);
 
-    public List<LetterDto> getLetterByMeeting(UUID uuid);
+    public List<LetterDto> getLetterByMeeting(LetterFindRequestDto dto);
 
-    public List<LetterDto> getLetterByMember(long memberNo);
+    public List<LetterDto> getLetterByMember(LetterFindRequestDto memberNo);
 
     public List<LetterDto> getLetterByFUser(String email);
 

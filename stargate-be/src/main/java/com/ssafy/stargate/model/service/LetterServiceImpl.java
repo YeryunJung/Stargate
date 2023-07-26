@@ -4,6 +4,8 @@ import com.ssafy.stargate.exception.LetterException;
 import com.ssafy.stargate.model.dto.common.LetterDto;
 import com.ssafy.stargate.model.dto.request.LetterCreateRequestDto;
 import com.ssafy.stargate.model.dto.request.LetterDeleteRequestDto;
+import com.ssafy.stargate.model.dto.request.LetterFindRequestDto;
+import com.ssafy.stargate.model.dto.request.LetterUpdateRequestDto;
 import com.ssafy.stargate.model.entity.FUser;
 import com.ssafy.stargate.model.entity.Letter;
 import com.ssafy.stargate.model.entity.Meeting;
@@ -77,7 +79,7 @@ public class LetterServiceImpl implements LetterService{
      * @return LetterDto 수정 완료된 편지 정보 담는 dto
      */
     @Override
-    public LetterDto updateLetter(LetterDto dto) throws LetterException {
+    public LetterDto updateLetter(LetterUpdateRequestDto dto) throws LetterException {
 
         Letter letter = letterRepository.findById(dto.getNo()).orElseThrow();
 
@@ -138,13 +140,13 @@ public class LetterServiceImpl implements LetterService{
 
     /**
      * 팬미팅 번호를 기준으로 편지들 정보 조회
-     * @param uuid UUID 팬미팅 번호
+     * @param dto LetterFindRequestDto 편지 찾기 위한 dto
      * @return List<LetterDto> 팬미팅에 보내진 편지 목록
      */
     @Override
-    public List<LetterDto> getLetterByMeeting(UUID uuid) {
+    public List<LetterDto> getLetterByMeeting(LetterFindRequestDto dto) {
 
-        List<Letter> letters = letterRepository.findByMeeting_Uuid(uuid);
+        List<Letter> letters = letterRepository.findByMeeting_Uuid(dto.getUuid());
 
         return letters.stream().map((Letter -> LetterDto.builder()
                 .no(Letter.getNo())
@@ -160,13 +162,13 @@ public class LetterServiceImpl implements LetterService{
 
     /**
      * 연예인 번호를 기준으로 편지들 정보 조회
-     * @param memberNo long 연예인 번호
+     * @param dto LetterFindRequestDto 편지 찾기 위한 dto
      * @return List<LetterDto> 연예인에게 보내진 편지 목록
      */
     @Override
-    public List<LetterDto> getLetterByMember(long memberNo) {
+    public List<LetterDto> getLetterByMember(LetterFindRequestDto dto) {
 
-        List<Letter> letters = letterRepository.findBypMemberMemberNo(memberNo);
+        List<Letter> letters = letterRepository.findBypMemberMemberNo(dto.getMemberNo());
 
         return letters.stream().map((Letter -> LetterDto.builder()
                 .no(Letter.getNo())
