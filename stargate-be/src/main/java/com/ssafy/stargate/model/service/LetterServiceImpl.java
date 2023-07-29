@@ -1,6 +1,5 @@
 package com.ssafy.stargate.model.service;
 
-import com.ssafy.stargate.exception.LetterException;
 import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.LetterDto;
 import com.ssafy.stargate.model.dto.request.LetterCreateRequestDto;
@@ -18,9 +17,7 @@ import com.ssafy.stargate.model.repository.PMemberRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 편지 서비스 구현체
