@@ -41,6 +41,8 @@ public interface FUserService {
 
     public FUserEmailCheckResponseDto checkDuplicateEmail(FUserEmailCheckRequestDto dto);
 
+    public void logout();
+
 
 
 

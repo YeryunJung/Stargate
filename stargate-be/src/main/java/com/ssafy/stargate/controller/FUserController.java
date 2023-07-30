@@ -163,4 +163,14 @@ public class FUserController {
         return ResponseEntity.ok(fUserService.checkDuplicateEmail(dto));
     }
 
+    /**
+     * 로그 아웃 (JwtToken 에 저장되어 있는 유저의 refreshToken 삭제)
+     * @return 성공 -> 200
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(){
+        fUserService.logout();
+        return ResponseEntity.ok(null);
+    }
+
 }

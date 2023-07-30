@@ -7,6 +7,7 @@ import com.ssafy.stargate.model.entity.Meeting;
 import com.ssafy.stargate.model.entity.MeetingFUserBridge;
 import com.ssafy.stargate.model.repository.MeetingFUserRepository;
 import com.ssafy.stargate.model.repository.MeetingRepository;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class DashboardServiceImpl implements DashboardService{
      * @throws NotFoundException 해당하는 AUTH 가 USER, PRODUCER 가 아닐 경우
      */
     @Override
+    @Transactional
     public DashboardResponseDto getDashBoard(UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) throws NotFoundException{
 
         todayMeetings = new ArrayList<>();

@@ -19,10 +19,16 @@ import com.ssafy.stargate.model.repository.FUserRepository;
 import com.ssafy.stargate.model.repository.JwtTokenRepository;
 import com.ssafy.stargate.util.JwtTokenUtil;
 import jakarta.transaction.Transactional;
+import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -51,6 +57,12 @@ public class FUserServiceImpl implements FUserService {
 
     @Autowired
     private JwtTokenRepository jwtTokenRepository;
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    @Value("${spring.mail.username}")
+    private String username;
     
     /**
      * 팬 유저 회원가입을 진행한다.
@@ -85,6 +97,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws LoginException 로그인 실패 에러
      */
     @Override
+    @Transactional
     public JwtResponseDto login(FUserLoginRequestDto dto) throws NotFoundException, LoginException{
         FUser fUser = fUserRepository.findById(dto.getEmail()).orElseThrow(() -> new NotFoundException("해당 회원 정보는 존재하지 않는 회원입니다."));
 
@@ -118,6 +131,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
+    @Transactional
     public FUserDto getFUser(Principal principal) throws NotFoundException{
         String email = principal.getName();
         FUser fUser = fUserRepository.findById(email).orElseThrow(() -> new NotFoundException("해당하는 회원 정보를 찾지 못했습니다."));
@@ -138,6 +152,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
+    @Transactional
     public void updateFUser(FUserUpdateRequestDto fUserDto, Principal principal) throws NotFoundException {
 
         FUser fUser = fUserRepository.findById(principal.getName()).orElseThrow(() -> new NotFoundException("해당하는 회원 정보를 찾지 못했습니다."));
@@ -162,6 +177,7 @@ public class FUserServiceImpl implements FUserService {
      * @param principal Principal 회원 email 정보가 담긴 FUserDto 객체
      */
     @Override
+    @Transactional
     public void deleteFUser(Principal principal) {
         fUserRepository.deleteById(principal.getName());
         jwtTokenRepository.deleteById(principal.getName());
@@ -174,6 +190,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
+    @Transactional
     public FUserFindIdDto getFUserId(FUserFindIdDto dto) throws NotFoundException{
         FUser fUser = fUserRepository.findByName(dto.getName()).orElseThrow(() -> new NotFoundException("아이디 찾기 실패 : 해당 아이디와 일치 하는 회원이 없습니다."));
 
@@ -195,6 +212,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
+    @Transactional
     public FUserFindPwDto getCertifyCode(FUserFindPwDto dto) throws NotFoundException{
 
         log.info("비밀번호 찾기 {}", dto.getEmail());
@@ -215,6 +233,8 @@ public class FUserServiceImpl implements FUserService {
             certifyRepository.save(code);
             fUser.setCertify(code);
 
+            sendCodeByMail(username, dto.getEmail(), certify);
+
             return FUserFindPwDto.builder()
                     .code(certify)
                     .email(dto.getEmail())
@@ -231,6 +251,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
+    @Transactional
     public void checkCertify(FUserFindPwDto dto) throws LoginException, NotFoundException{
         String code = dto.getCode();
 
@@ -251,6 +272,7 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러, 존재하지 않는 인증번호 에러
      */
     @Override
+    @Transactional
     public void updateFUserPw(FUserFindPwDto dto) throws NotFoundException{
 
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -273,10 +295,27 @@ public class FUserServiceImpl implements FUserService {
      * @return FUserEmailCheckResponseDto 이메일 존재 여부가 담긴 dto
      */
     @Override
+    @Transactional
     public FUserEmailCheckResponseDto checkDuplicateEmail(FUserEmailCheckRequestDto dto) {
         return FUserEmailCheckResponseDto.builder()
                 .exist(isDuplicatedEmail(dto.getEmail()))
                 .build();
+    }
+
+    /**
+     * 로그아웃 수행, JwtToken 에서 회원의 refreshToken 삭제
+     */
+    @Override
+    @Transactional
+    public void logout() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName().toString();
+
+        JwtToken refreshToken = jwtTokenRepository.findById(email).orElse(null);
+
+        if(refreshToken != null){
+            jwtTokenRepository.deleteById(email);
+        }
+
     }
 
     /**
@@ -293,6 +332,25 @@ public class FUserServiceImpl implements FUserService {
         }
         return isDuplicated;
     }
+
+    /**
+     * 인증 번호가 적힌 이메일 전송
+     * @param stargateEmail String stargate 이메일
+     * @param email String 인증번호를 받을 이메일
+     * @param code String 인증번호
+     */
+    private void sendCodeByMail(String stargateEmail, String email, String code){
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(stargateEmail);
+        message.setTo(email);
+        message.setText("[스타게이트] 비밀번호 재설정을 위한 인증 번호 발송");
+        message.setText("인증번호는 " + code + "입니다.");
+
+        mailSender.send(message);
+    }
+
+
 
 
 }
