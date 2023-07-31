@@ -47,7 +47,7 @@ public class Meeting extends BaseEntity {
     private int photoNum;
 
     @Column
-    private String image; // TODO: multipart로 Testing해보기
+    private String image;
 
     @ManyToOne
     @JoinColumn(name = "email",referencedColumnName = "email")
@@ -63,5 +63,6 @@ public class Meeting extends BaseEntity {
     private List<MeetingFUserBridge> meetingFUsers = new ArrayList<>();
 
     @OneToMany(mappedBy = "meeting")
+    @Builder.Default
     private List<Letter> letters = new ArrayList<>();
 }
