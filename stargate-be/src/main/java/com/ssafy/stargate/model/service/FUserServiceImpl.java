@@ -42,6 +42,7 @@ import java.security.Principal;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class FUserServiceImpl implements FUserService {
     @Autowired
     private FUserRepository fUserRepository;
@@ -69,7 +70,7 @@ public class FUserServiceImpl implements FUserService {
      * @param dto [FUserRegisterRequestDto] 유저 회원가입 정보
      * @throws EmailDuplicationException 아이디(이메일) 중복 가입 시 발생하는 에러
      */
-    @Transactional
+
     public void create(@Validated FUserDto dto) throws EmailDuplicationException {
 
         if (isDuplicatedEmail(dto.getEmail())) {
@@ -97,7 +98,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws LoginException 로그인 실패 에러
      */
     @Override
-    @Transactional
     public JwtResponseDto login(FUserLoginRequestDto dto) throws NotFoundException, LoginException{
         FUser fUser = fUserRepository.findById(dto.getEmail()).orElseThrow(() -> new NotFoundException("해당 회원 정보는 존재하지 않는 회원입니다."));
 
@@ -131,7 +131,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
-    @Transactional
     public FUserDto getFUser(Principal principal) throws NotFoundException{
 
         log.info("principal in getFUser {}", principal.getName());
@@ -155,7 +154,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
-    @Transactional
     public FUserDto updateFUser(FUserUpdateRequestDto fUserDto, Principal principal) throws NotFoundException {
 
         FUser fUser = fUserRepository.findById(principal.getName()).orElseThrow(() -> new NotFoundException("해당하는 회원 정보를 찾지 못했습니다."));
@@ -189,7 +187,6 @@ public class FUserServiceImpl implements FUserService {
      * @param principal Principal 회원 email 정보가 담긴 FUserDto 객체
      */
     @Override
-    @Transactional
     public void deleteFUser(Principal principal) {
         fUserRepository.deleteById(principal.getName());
         jwtTokenRepository.deleteById(principal.getName());
@@ -202,7 +199,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
-    @Transactional
     public FUserFindIdDto getFUserId(FUserFindIdDto dto) throws NotFoundException{
         FUser fUser = fUserRepository.findByName(dto.getName()).orElseThrow(() -> new NotFoundException("아이디 찾기 실패 : 해당 아이디와 일치 하는 회원이 없습니다."));
 
@@ -224,7 +220,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
-    @Transactional
     public FUserFindPwDto getCertifyCode(FUserFindPwDto dto) throws NotFoundException{
 
         log.info("비밀번호 찾기 {}", dto.getEmail());
@@ -263,7 +258,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
-    @Transactional
     public void checkCertify(FUserFindPwDto dto) throws LoginException, NotFoundException{
         String code = dto.getCode();
 
@@ -284,7 +278,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException 존재하지 않는 회원 에러, 존재하지 않는 인증번호 에러
      */
     @Override
-    @Transactional
     public void updateFUserPw(FUserFindPwDto dto) throws NotFoundException{
 
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -307,7 +300,6 @@ public class FUserServiceImpl implements FUserService {
      * @return FUserEmailCheckResponseDto 이메일 존재 여부가 담긴 dto
      */
     @Override
-    @Transactional
     public UserEmailCheckResponseDto checkDuplicateEmail(UserEmailCheckRequestDto dto) {
         return UserEmailCheckResponseDto.builder()
                 .exist(isDuplicatedEmail(dto.getEmail()))
@@ -319,7 +311,6 @@ public class FUserServiceImpl implements FUserService {
      * @throws NotFoundException refreshToken 저장되어 있지 않은 상태, 로그아웃 되어 있는 상태
      */
     @Override
-    @Transactional
     public void logout() throws NotFoundException{
         String email = SecurityContextHolder.getContext().getAuthentication().getName().toString();
 

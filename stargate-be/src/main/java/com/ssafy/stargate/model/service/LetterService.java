@@ -14,17 +14,17 @@ import java.util.List;
  */
 public interface LetterService {
 
-    public LetterDto createLetter(LetterCreateRequestDto dto) throws NotFoundException;
+    public LetterDto createLetter(LetterDto dto) throws NotFoundException;
 
-    public LetterDto updateLetter(LetterUpdateRequestDto dto) throws NotFoundException;
+    public LetterDto updateLetter(LetterDto dto) throws NotFoundException;
 
-    public void deleteLetter(LetterDeleteRequestDto dto);
+    public void deleteLetter(LetterDto dto);
 
     public LetterDto getLetter(Long no) throws NotFoundException;
 
-    public List<LetterDto> getLetterByMeeting(LetterFindRequestDto dto);
+    public List<LetterDto> getLetterByMeeting(LetterDto dto);
 
-    public List<LetterDto> getLetterByMember(LetterFindRequestDto memberNo);
+    public List<LetterDto> getLetterByMember(LetterDto memberNo);
 
     public List<LetterDto> getLetterByFUser(String email);
 

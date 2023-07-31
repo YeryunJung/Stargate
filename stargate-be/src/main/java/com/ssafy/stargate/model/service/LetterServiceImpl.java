@@ -25,6 +25,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
+@Transactional
 public class LetterServiceImpl implements LetterService{
 
     @Autowired
@@ -46,8 +47,7 @@ public class LetterServiceImpl implements LetterService{
      * @throws NotFoundException 존재하지 않는 회원, 존재하지 않는 멤버, 존재하지 않는 팬미팅 에러
      */
     @Override
-    @Transactional
-    public LetterDto createLetter(LetterCreateRequestDto dto) throws NotFoundException {
+    public LetterDto createLetter(LetterDto dto) throws NotFoundException {
 
         FUser fUser = fUserRepository.findById(dto.getEmail()).orElseThrow(() -> new NotFoundException("존재하지 않는 회원입니다."));
         PMember pMember = pMemberRepository.findById(dto.getMemberNo()).orElseThrow(() -> new NotFoundException("존재하지 않는 멤버입니다."));
@@ -81,8 +81,7 @@ public class LetterServiceImpl implements LetterService{
      * @throws NotFoundException 존재하지 않는 편지 에러
      */
     @Override
-    @Transactional
-    public LetterDto updateLetter(LetterUpdateRequestDto dto) throws NotFoundException {
+    public LetterDto updateLetter(LetterDto dto) throws NotFoundException {
 
         Letter letter = letterRepository.findById(dto.getNo()).orElseThrow();
 
@@ -111,8 +110,7 @@ public class LetterServiceImpl implements LetterService{
      * @param dto LetterDeleteRequestDto 삭제하려는 편지 번호 정보를 담는 dto
      */
     @Override
-    @Transactional
-    public void deleteLetter(LetterDeleteRequestDto dto){
+    public void deleteLetter(LetterDto dto){
 
             letterRepository.deleteById(dto.getNo());
     }
@@ -125,7 +123,6 @@ public class LetterServiceImpl implements LetterService{
      * @throws NotFoundException 존재 하지 않는 편지 에러
      */
     @Override
-    @Transactional
     public LetterDto getLetter(Long no) throws NotFoundException {
 
         Letter letter = letterRepository.findById(no).orElseThrow(() -> new NotFoundException("찾으려는 편지는 존재하지 않는 편지입니다"));
@@ -147,8 +144,7 @@ public class LetterServiceImpl implements LetterService{
      * @return List<LetterDto> 팬미팅에 보내진 편지 목록
      */
     @Override
-    @Transactional
-    public List<LetterDto> getLetterByMeeting(LetterFindRequestDto dto) {
+    public List<LetterDto> getLetterByMeeting(LetterDto dto) {
 
         List<Letter> letters = letterRepository.findByMeeting_Uuid(dto.getUuid()).orElseThrow();
 
@@ -170,8 +166,7 @@ public class LetterServiceImpl implements LetterService{
      * @return List<LetterDto> 연예인에게 보내진 편지 목록
      */
     @Override
-    @Transactional
-    public List<LetterDto> getLetterByMember(LetterFindRequestDto dto) {
+    public List<LetterDto> getLetterByMember(LetterDto dto) {
 
         List<Letter> letters = letterRepository.findBypMemberMemberNo(dto.getMemberNo()).orElseThrow();
 
@@ -193,7 +188,6 @@ public class LetterServiceImpl implements LetterService{
      * @return List<LetterDto> 팬유저가 작성한 편지 목록
      */
     @Override
-    @Transactional
     public List<LetterDto> getLetterByFUser(String email) {
 
         List<Letter> letters = letterRepository.findByfUserEmail(email).orElseThrow();

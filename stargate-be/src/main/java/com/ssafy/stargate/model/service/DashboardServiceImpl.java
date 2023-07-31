@@ -57,19 +57,14 @@ public class DashboardServiceImpl implements DashboardService{
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = (UsernamePasswordAuthenticationToken) authentication;
 
         todayMeetings = new ArrayList<>();
-
         futureMeetings = new ArrayList<>();
-
         pastMeetings = new ArrayList<>();
-
         today = LocalDateTime.now();
 
         String auth = usernamePasswordAuthenticationToken.getAuthorities().stream().toList().get(0).getAuthority().toString();
-
         String email = usernamePasswordAuthenticationToken.getName().toString();
 
         log.info("auth {} ", auth);
-
         log.info("email {} ", email);
 
         if(auth.equals("USER")){
@@ -77,13 +72,11 @@ public class DashboardServiceImpl implements DashboardService{
             List<MeetingFUserBridge> meetingFUserBridgeList = meetingFUserRepository.findByEmail(email).orElse(null);
 
             if(meetingFUserBridgeList != null){
-
                 for(MeetingFUserBridge meetingFUserBridge : meetingFUserBridgeList){
 
                     log.info("meetingFUserBridge {} ", meetingFUserBridge.getEmail());
 
                     Meeting meeting = meetingRepository.findById(meetingFUserBridge.getMeeting().getUuid()).orElse(null);
-
                     classifyMeetings(meeting);
                 }
             }
