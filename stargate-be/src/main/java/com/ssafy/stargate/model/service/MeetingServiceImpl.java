@@ -32,7 +32,7 @@ TODO: Multipart로 이미지 받아오기
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MeetingServiceImplement implements MeetingService {
+public class MeetingServiceImpl implements MeetingService {
     @Autowired
     private final MeetingRepository meetingRepository;
 
@@ -55,9 +55,6 @@ public class MeetingServiceImplement implements MeetingService {
     @Value("${s3.filepath.meeting}")
     private String filePath;
 
-    @Autowired
-    private final FileHandler fileHandler;
-
     /**
      * 미팅 세부정보를 가져온다.
      * ResponseDto에는 기본 정보에 미팅방 ID(roomId), 팬유저 가입 여부(isRegister)가 추가적으로 들어간다.
@@ -69,54 +66,42 @@ public class MeetingServiceImplement implements MeetingService {
      * @return [MeetingDetailResponseDto] 기본 정보 + 맴버 미팅방 ID, 유저 가입 여부를 포함한 DTO
      * @throws NotFoundException 데이터 찾기 실패 에러
      */
+
+    /*
+    TODO:
+     - add image info
+     - add group [0]
+     - add membername
+     */
     @Override
     public MeetingDetailResponseDto getMeeting(UUID uuid, Principal principal) throws NotFoundException {
         log.info("data : {}", uuid);
         String email = principal.getName();
 
-        Meeting meeting = meetingRepository.findByIdAndEmail(uuid, email)
-                .orElseThrow(() -> new NotFoundException("미팅 존재하지 않음"));
+        Meeting meeting = getMeeting(uuid, email);
 
-        List<MeetingDetailResponseDto.MeetingMember> meetingMemberDtos = (List<MeetingDetailResponseDto.MeetingMember>) meeting.getMeetingMembers()
-                .stream()
-                .map(meetingMember -> MeetingDetailResponseDto.MeetingMember.builder()
-                        .uuid(meetingMember.getUuid())
-                        .memberNo(meetingMember.getPMember().getMemberNo())
-                        .orderNum(meetingMember.getOrderNum())
-                        .roomId(meeting.getUuid() + "." + meetingMember.getUuid()) // create roomId
-                        .build()).toList();
+        List<MeetingDetailResponseDto.MeetingMember> meetingMemberDtos = getMeetingDetailMemberDtoList(meeting);
 
+        List<MeetingDetailResponseDto.MeetingFUser> meetingFUserDtos = getMeetingDetailFUserDtoList(meeting);
 
-        List<MeetingDetailResponseDto.MeetingFUser> meetingFUserDtos = (List<MeetingDetailResponseDto.MeetingFUser>) meeting.getMeetingFUsers()
-                .stream()
-                .map(meetingFUser -> {
-                    MeetingDetailResponseDto.MeetingFUser.MeetingFUserBuilder builder = MeetingDetailResponseDto.MeetingFUser.builder();
-                    builder.no(meetingFUser.getNo())
-                            .email(meetingFUser.getEmail())
-                            .orderNum(meetingFUser.getOrderNum());
-                    Optional<FUser> optionalFUser = fUserRepository.findById(meetingFUser.getEmail());
-                    if (optionalFUser.isPresent()) {
-                        builder.isRegister(true);
-                        builder.name(optionalFUser.get().getName());
-                    } else {
-                        builder.isRegister(false);
-                        builder.name(null);
-                    }
-                    return builder.build();
-                }).toList();
+        SavedFileDto savedFileDto = getSavedFile(meeting);
 
+        PGroup group = getGroup(meeting);
         return MeetingDetailResponseDto.builder()
                 .uuid(meeting.getUuid())
                 .name(meeting.getName())
                 .startDate(meeting.getStartDate())
                 .waitingTime(meeting.getWaitingTime())
                 .meetingTime(meeting.getMeetingTime())
+                .groupNo(group.getGroupNo())
+                .groupName(group.getName())
                 .notice(meeting.getNotice())
                 .photoNum(meeting.getPhotoNum())
                 .meetingMembers(meetingMemberDtos)
                 .meetingFUsers(meetingFUserDtos)
                 .build();
     }
+
 
     /**
      * 신규 미팅을 생성한다.
@@ -134,12 +119,6 @@ public class MeetingServiceImplement implements MeetingService {
         String email = principal.getName();
 
         MultipartFile imageFile = dto.getImageFile();
-        String uuidFilename = null;
-        String key = null;
-        if (imageFile != null) {
-            uuidFilename = fileHandler.getUuidFilename(imageFile.getOriginalFilename());
-            key = fileHandler.getKey(filePath, uuidFilename);
-        }
 
         try {
             Meeting meeting = Meeting.builder()
@@ -359,4 +338,60 @@ public class MeetingServiceImplement implements MeetingService {
             throw new CRUDException("미팅 수정(유저 미팅 수정) 도중 오류가 발생했습니다.");
         }
     }
+
+
+    private Meeting getMeeting(UUID uuid, String email) throws NotFoundException {
+        return meetingRepository.findByIdAndEmail(uuid, email)
+                .orElseThrow(() -> new NotFoundException("미팅 존재하지 않음"));
+    }
+
+    private List<MeetingDetailResponseDto.MeetingMember> getMeetingDetailMemberDtoList(Meeting meeting) {
+        return (List<MeetingDetailResponseDto.MeetingMember>) meeting.getMeetingMembers()
+                .stream()
+                .map(meetingMember -> MeetingDetailResponseDto.MeetingMember.builder()
+                        .uuid(meetingMember.getUuid())
+                        .memberNo(meetingMember.getPMember().getMemberNo())
+                        .name(meetingMember.getPMember().getName())
+                        .orderNum(meetingMember.getOrderNum())
+                        .roomId(getRoomId(meeting, meetingMember)) // create roomId
+                        .build()).toList();
+    }
+
+    private List<MeetingDetailResponseDto.MeetingFUser> getMeetingDetailFUserDtoList(Meeting meeting) {
+        return meeting.getMeetingFUsers()
+                .stream()
+                .map(meetingFUser -> {
+                    MeetingDetailResponseDto.MeetingFUser.MeetingFUserBuilder builder = MeetingDetailResponseDto.MeetingFUser.builder();
+                    builder.no(meetingFUser.getNo())
+                            .email(meetingFUser.getEmail())
+                            .orderNum(meetingFUser.getOrderNum());
+
+                    FUser fUser = getFUser(meetingFUser);
+                    builder.isRegister((fUser != null));
+                    builder.name(fUser.getName());
+
+                    return builder.build();
+                }).toList();
+    }
+
+    private FUser getFUser(MeetingFUserBridge meetingFUser) {
+        Optional<FUser> optionalFUser = fUserRepository.findById(meetingFUser.getEmail());
+        return (optionalFUser.isPresent())?optionalFUser.get() : null;
+    }
+
+    private PGroup getGroup(Meeting meeting) {
+        if(meeting.getMeetingMembers().size() < 1) {
+            return null;
+        }
+        MeetingMemberBridge meetingMember = meeting.getMeetingMembers().get(0);
+        return meetingMember.getPMember().getPGroup();
+    }
+
+    private String getRoomId(Meeting meeting, MeetingMemberBridge meetingMember) {
+        return meeting.getUuid() + "." + meetingMember.getUuid();
+    }
+
+//    private SavedFileDto getSavedFile(Meeting meeting) {
+//        fileHandler.getFileInfo()
+//    }
 }
