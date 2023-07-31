@@ -19,13 +19,11 @@ import com.ssafy.stargate.model.repository.FUserRepository;
 import com.ssafy.stargate.model.repository.JwtTokenRepository;
 import com.ssafy.stargate.util.JwtTokenUtil;
 import jakarta.transaction.Transactional;
-import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -59,11 +57,11 @@ public class FUserServiceImpl implements FUserService {
     @Autowired
     private JwtTokenRepository jwtTokenRepository;
 
-    //@Autowired
-    //private JavaMailSender mailSender;
+    @Autowired
+    private JavaMailSender mailSender;
 
-//    @Value("${spring.mail.username}")
-//    private String username;
+    @Value("${spring.mail.username}")
+    private String username;
     
     /**
      * 팬 유저 회원가입을 진행한다.
@@ -237,10 +235,11 @@ public class FUserServiceImpl implements FUserService {
                     .fUser(fUser)
                     .build();
 
-            certifyRepository.save(code);
-            fUser.setCertify(code);
+            Certify savedCertify = certifyRepository.save(code);
+            fUser.setCertify(savedCertify);
 
-            //sendCodeByMail(username, dto.getEmail(), certify);
+
+            sendCodeByMail(username, dto.getEmail(), certify);
 
             return FUserFindPwDto.builder()
                     .code(certify)
@@ -345,16 +344,16 @@ public class FUserServiceImpl implements FUserService {
      * @param email String 인증번호를 받을 이메일
      * @param code String 인증번호
      */
-//    private void sendCodeByMail(String stargateEmail, String email, String code){
-//
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setFrom(stargateEmail);
-//        message.setTo(email);
-//        message.setText("[스타게이트] 비밀번호 재설정을 위한 인증 번호 발송");
-//        message.setText("인증번호는 " + code + "입니다.");
-//
-//        mailSender.send(message);
-//    }
+    private void sendCodeByMail(String stargateEmail, String email, String code){
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(stargateEmail);
+        message.setTo(email);
+        message.setSubject("[스타게이트] 비밀번호 재설정을 위한 인증 번호 발송");
+        message.setText("인증번호는 " + code + "입니다.");
+
+        mailSender.send(message);
+    }
 
 }
 
