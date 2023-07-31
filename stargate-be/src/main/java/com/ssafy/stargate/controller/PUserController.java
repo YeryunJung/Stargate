@@ -5,6 +5,7 @@ import com.ssafy.stargate.exception.LoginException;
 import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
 import com.ssafy.stargate.model.dto.common.PUserDto;
+import com.ssafy.stargate.model.dto.response.UserEmailCheckResponseDto;
 import com.ssafy.stargate.model.service.PUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +43,9 @@ public class PUserController {
     }
 
     @PostMapping("/check-email")
-    public ResponseEntity<?> checkPuserEmailExist(@RequestParam("email")String email){
+    public ResponseEntity<UserEmailCheckResponseDto> checkPuserEmailExist(@RequestParam("email")String email){
         boolean result = pUserService.checkEmailExist(email);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(UserEmailCheckResponseDto.builder().exist(result).build());
     }
 
 
