@@ -9,21 +9,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-// TODO: Secure 사용하지 않는다면 안사용할 수도
 
+
+/**
+ * AWS S3와 관련된 설정을 수행한다.
+ */
 @Slf4j
 @Configuration
 public class AmazonS3Config {
 
-    @Value("${spring.s3.access-key}")
+    @Value("${cloud.aws.credentials.accessKey}")
     private String accessKey;
 
-    @Value("${spring.s3.secret-key}")
+    @Value("${cloud.aws.credentials.secretKey}")
     private String secretKey;
 
     @Value("${cloud.aws.region.static}")
     private String region;
 
+    /**
+     * Amazon S3 웹 서비스에 설정한 계정으로 액세스한 클라이언트 반환한다.
+     * @return AmazonS3Client 객체 제공
+     */
     @Bean
     public AmazonS3Client amazonS3Client() {
         BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(accessKey, secretKey);
