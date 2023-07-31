@@ -20,9 +20,8 @@ public class MeetingFUserBridge extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long no;
 
-    @ManyToOne
-    @JoinColumn(name = "email")
-    private FUser fUser;
+    @Column
+    private String email; // fuser
 
     @ManyToOne
     @JoinColumn(name="meeting.uuid")

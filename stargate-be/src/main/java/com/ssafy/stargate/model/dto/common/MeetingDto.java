@@ -55,7 +55,7 @@ public class MeetingDto {
         return (List<MeetingFUserBridgeDto>) meetingFUsers.stream()
                 .map(meetingFUser -> MeetingFUserBridgeDto.builder()
                         .no(meetingFUser.getNo())
-                        .email(meetingFUser.getFUser().getEmail())
+                        .email(meetingFUser.getEmail())
                         .orderNum(meetingFUser.getOrderNum())
                         .build()).toList();
     }

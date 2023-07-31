@@ -58,11 +58,11 @@ public class FUserServiceImpl implements FUserService {
     @Autowired
     private JwtTokenRepository jwtTokenRepository;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    //@Autowired
+    //private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String username;
+//    @Value("${spring.mail.username}")
+//    private String username;
     
     /**
      * 팬 유저 회원가입을 진행한다.
@@ -133,7 +133,10 @@ public class FUserServiceImpl implements FUserService {
     @Override
     @Transactional
     public FUserDto getFUser(Principal principal) throws NotFoundException{
+
+        log.info("principal in getFUser {}", principal.getName());
         String email = principal.getName();
+
         FUser fUser = fUserRepository.findById(email).orElseThrow(() -> new NotFoundException("해당하는 회원 정보를 찾지 못했습니다."));
 
         return FUserDto.builder()
@@ -153,7 +156,7 @@ public class FUserServiceImpl implements FUserService {
      */
     @Override
     @Transactional
-    public void updateFUser(FUserUpdateRequestDto fUserDto, Principal principal) throws NotFoundException {
+    public FUserDto updateFUser(FUserUpdateRequestDto fUserDto, Principal principal) throws NotFoundException {
 
         FUser fUser = fUserRepository.findById(principal.getName()).orElseThrow(() -> new NotFoundException("해당하는 회원 정보를 찾지 못했습니다."));
 
@@ -169,7 +172,16 @@ public class FUserServiceImpl implements FUserService {
         fUser.setBirthday(fUserDto.getBirthday());
         fUser.setPhone(fUserDto.getPhone());
 
-        fUserRepository.save(fUser);
+        FUser savedFUser = fUserRepository.save(fUser);
+
+        return FUserDto.builder()
+                .email(savedFUser.getEmail())
+                .password(savedFUser.getPassword())
+                .name(savedFUser.getName())
+                .nickname(savedFUser.getNickname())
+                .birthday(savedFUser.getBirthday())
+                .phone(savedFUser.getPhone())
+                .build();
     }
 
     /**
@@ -233,7 +245,7 @@ public class FUserServiceImpl implements FUserService {
             certifyRepository.save(code);
             fUser.setCertify(code);
 
-            sendCodeByMail(username, dto.getEmail(), certify);
+            //sendCodeByMail(username, dto.getEmail(), certify);
 
             return FUserFindPwDto.builder()
                     .code(certify)
@@ -301,19 +313,22 @@ public class FUserServiceImpl implements FUserService {
                 .exist(isDuplicatedEmail(dto.getEmail()))
                 .build();
     }
-
+    
     /**
      * 로그아웃 수행, JwtToken 에서 회원의 refreshToken 삭제
+     * @throws NotFoundException refreshToken 저장되어 있지 않은 상태, 로그아웃 되어 있는 상태
      */
     @Override
     @Transactional
-    public void logout() {
+    public void logout() throws NotFoundException{
         String email = SecurityContextHolder.getContext().getAuthentication().getName().toString();
 
         JwtToken refreshToken = jwtTokenRepository.findById(email).orElse(null);
 
         if(refreshToken != null){
             jwtTokenRepository.deleteById(email);
+        }else{
+            throw new NotFoundException("해당 유저는 이미 로그아웃 상태입니다.");
         }
 
     }
@@ -339,19 +354,16 @@ public class FUserServiceImpl implements FUserService {
      * @param email String 인증번호를 받을 이메일
      * @param code String 인증번호
      */
-    private void sendCodeByMail(String stargateEmail, String email, String code){
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(stargateEmail);
-        message.setTo(email);
-        message.setText("[스타게이트] 비밀번호 재설정을 위한 인증 번호 발송");
-        message.setText("인증번호는 " + code + "입니다.");
-
-        mailSender.send(message);
-    }
-
-
-
+//    private void sendCodeByMail(String stargateEmail, String email, String code){
+//
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setFrom(stargateEmail);
+//        message.setTo(email);
+//        message.setText("[스타게이트] 비밀번호 재설정을 위한 인증 번호 발송");
+//        message.setText("인증번호는 " + code + "입니다.");
+//
+//        mailSender.send(message);
+//    }
 
 }
 

@@ -27,7 +27,7 @@ public interface FUserService {
 
     public FUserDto getFUser(Principal principal) throws NotFoundException;
 
-    public void updateFUser(FUserUpdateRequestDto fUserDto, Principal principal) throws NotFoundException ;
+    public FUserDto updateFUser(FUserUpdateRequestDto fUserDto, Principal principal) throws NotFoundException ;
 
     public void deleteFUser(Principal principal);
 
@@ -41,7 +41,7 @@ public interface FUserService {
 
     public FUserEmailCheckResponseDto checkDuplicateEmail(FUserEmailCheckRequestDto dto);
 
-    public void logout();
+    public void logout() throws NotFoundException;
 
 
 

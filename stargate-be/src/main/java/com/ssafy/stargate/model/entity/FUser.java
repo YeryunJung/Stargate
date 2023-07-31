@@ -46,7 +46,4 @@ public class FUser extends BaseEntity {
     @Builder.Default
     private List<Letter> letters = new ArrayList<>();
 
-    @OneToMany(mappedBy = "fUser")
-    @Builder.Default
-    private List<MeetingFUserBridge> meetingFUserBridges = new ArrayList<>();
 }

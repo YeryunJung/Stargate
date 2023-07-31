@@ -83,8 +83,7 @@ public class FUserController {
     @PutMapping("/update")
     public ResponseEntity<?> updateFUserInfo(@ModelAttribute @Validated FUserUpdateRequestDto dto, Principal principal) throws NotFoundException {
 
-        fUserService.updateFUser(dto, principal);
-        return ResponseEntity.ok(null);
+        return ResponseEntity.ok(fUserService.updateFUser(dto, principal));
     }
 
     /**
@@ -157,7 +156,7 @@ public class FUserController {
      * @param dto FUserEmailCheckRequestDto 회원 가입하려는 이메일 정보가 담긴 dto
      * @return [ResponseEntity<FUserEmailCheckResponseDto>] 이메일 중복 여부 담긴 dto
      */
-    @GetMapping("/check-email")
+    @PostMapping("/check-email")
     public ResponseEntity<FUserEmailCheckResponseDto> checkDuplicateEmail(@RequestBody FUserEmailCheckRequestDto dto){
 
         return ResponseEntity.ok(fUserService.checkDuplicateEmail(dto));
@@ -168,7 +167,7 @@ public class FUserController {
      * @return 성공 -> 200
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(){
+    public ResponseEntity<?> logout() throws NotFoundException{
         fUserService.logout();
         return ResponseEntity.ok(null);
     }

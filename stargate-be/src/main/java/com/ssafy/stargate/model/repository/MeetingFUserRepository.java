@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MeetingFUserRepository extends JpaRepository<MeetingFUserBridge, Long> {
-    Optional<List<MeetingFUserBridge>> findByfUserEmail(String email);
+    Optional<List<MeetingFUserBridge>> findByEmail(String email);
 
-    Optional<Meeting> findByMeeting_Uuid(UUID uuid);
 }

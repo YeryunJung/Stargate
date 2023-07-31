@@ -14,9 +14,14 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-
+/**
+ * 대시보드 미팅 정보 서비스 구현체
+ */
 @Service
 @Slf4j
 public class DashboardServiceImpl implements DashboardService{
@@ -38,13 +43,18 @@ public class DashboardServiceImpl implements DashboardService{
     /**
      * 회원 (email) 와 관련된 meeting 정보 조회 
      * USER 일 경우 MeetingFUserBridge 를 통해서 Meeting 조회, PRODUCER 는 바로 Meeting 조회
-     * @param usernamePasswordAuthenticationToken UsernamePasswordAuthenticationToken 인증 정보 담는 dto
      * @return DashboardResponseDto 과거, 현재, 미래 meeting 정보 저장하고 있는 dto
      * @throws NotFoundException 해당하는 AUTH 가 USER, PRODUCER 가 아닐 경우
      */
     @Override
     @Transactional
-    public DashboardResponseDto getDashBoard(UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken) throws NotFoundException{
+    public DashboardResponseDto getDashBoard() throws NotFoundException{
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+
+        Authentication authentication = securityContext.getAuthentication();
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = (UsernamePasswordAuthenticationToken) authentication;
 
         todayMeetings = new ArrayList<>();
 
@@ -64,13 +74,15 @@ public class DashboardServiceImpl implements DashboardService{
 
         if(auth.equals("USER")){
 
-            List<MeetingFUserBridge> meetingFUserBridgeList = meetingFUserRepository.findByfUserEmail(email).orElseThrow();
+            List<MeetingFUserBridge> meetingFUserBridgeList = meetingFUserRepository.findByEmail(email).orElse(null);
 
             if(meetingFUserBridgeList != null){
 
                 for(MeetingFUserBridge meetingFUserBridge : meetingFUserBridgeList){
 
-                    Meeting meeting = meetingFUserRepository.findByMeeting_Uuid(meetingFUserBridge.getMeeting().getUuid()).orElse(null);
+                    log.info("meetingFUserBridge {} ", meetingFUserBridge.getEmail());
+
+                    Meeting meeting = meetingRepository.findById(meetingFUserBridge.getMeeting().getUuid()).orElse(null);
 
                     classifyMeetings(meeting);
                 }
@@ -83,10 +95,8 @@ public class DashboardServiceImpl implements DashboardService{
                 classifyMeetings(meeting);
             }
         }else{
-
             throw new NotFoundException("해당하는 AUTH 는 유효하지 않습니다.");
         }
-
         return DashboardResponseDto.builder()
             .today(todayMeetings)
             .past(pastMeetings)
@@ -100,7 +110,7 @@ public class DashboardServiceImpl implements DashboardService{
      */
     private void classifyMeetings(Meeting meeting){
 
-        if(meeting != null ){
+        if(meeting != null){
 
             if(meeting.getStartDate().getDayOfYear() == today.getDayOfYear()){
                 todayMeetings.add(MeetingDto.entityToDto(meeting));

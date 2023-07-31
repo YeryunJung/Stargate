@@ -4,6 +4,7 @@ package com.ssafy.stargate.util;
 import com.ssafy.stargate.exception.InvalidTokenException;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,7 @@ public class JwtTokenUtil {
     private final static Long ACCESS_TOKEN_VALID_TIME = 24 * 60 * 60 * 1000L;
 
     private final static Long REFRESH_TOKEN_VALID_TIME = 14 * 24 * 60 * 60 * 1000L;
+
 
     /**
      * application-jwt 에 저장되어 있는 secretKey 로 key 초기화
@@ -173,9 +175,11 @@ public class JwtTokenUtil {
     }
 
     /**
-     * JwtToken DB 에 해당 이메일이 저장되어 있는지 확인
+     * JwtToken DB 에 해당 이메일이 저장되어 있는지 확인 (없으면 로그아웃 상태)
      */
     private boolean existingJwtToken(String email){
+
+
         return true;
 
     }
