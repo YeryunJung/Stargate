@@ -6,11 +6,11 @@ import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.FUserDto;
 import com.ssafy.stargate.model.dto.common.FUserFindIdDto;
 import com.ssafy.stargate.model.dto.common.FUserFindPwDto;
-import com.ssafy.stargate.model.dto.request.FUserEmailCheckRequestDto;
 import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
 import com.ssafy.stargate.model.dto.request.FUserUpdateRequestDto;
-import com.ssafy.stargate.model.dto.response.FUserEmailCheckResponseDto;
+import com.ssafy.stargate.model.dto.request.UserEmailCheckRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
+import com.ssafy.stargate.model.dto.response.UserEmailCheckResponseDto;
 import com.ssafy.stargate.model.entity.Certify;
 import com.ssafy.stargate.model.entity.FUser;
 import com.ssafy.stargate.model.entity.JwtToken;
@@ -308,8 +308,8 @@ public class FUserServiceImpl implements FUserService {
      */
     @Override
     @Transactional
-    public FUserEmailCheckResponseDto checkDuplicateEmail(FUserEmailCheckRequestDto dto) {
-        return FUserEmailCheckResponseDto.builder()
+    public UserEmailCheckResponseDto checkDuplicateEmail(UserEmailCheckRequestDto dto) {
+        return UserEmailCheckResponseDto.builder()
                 .exist(isDuplicatedEmail(dto.getEmail()))
                 .build();
     }
