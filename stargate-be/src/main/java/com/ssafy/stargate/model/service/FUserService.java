@@ -11,9 +11,11 @@ import com.ssafy.stargate.model.dto.request.FUserLoginRequestDto;
 import com.ssafy.stargate.model.dto.request.FUserUpdateRequestDto;
 import com.ssafy.stargate.model.dto.request.UserEmailCheckRequestDto;
 import com.ssafy.stargate.model.dto.response.JwtResponseDto;
+import com.ssafy.stargate.model.dto.response.RemindResponseDto;
 import com.ssafy.stargate.model.dto.response.UserEmailCheckResponseDto;
 import org.springframework.validation.annotation.Validated;
 import java.security.Principal;
+import java.util.UUID;
 
 
 /**
@@ -44,6 +46,5 @@ public interface FUserService {
     public void logout() throws NotFoundException;
 
 
-
-
+    public RemindResponseDto getRemind(UUID uuid, Principal principal);
 }
