@@ -2,10 +2,6 @@ package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.LetterDto;
-import com.ssafy.stargate.model.dto.request.LetterCreateRequestDto;
-import com.ssafy.stargate.model.dto.request.LetterDeleteRequestDto;
-import com.ssafy.stargate.model.dto.request.LetterFindRequestDto;
-import com.ssafy.stargate.model.dto.request.LetterUpdateRequestDto;
 import com.ssafy.stargate.model.entity.FUser;
 import com.ssafy.stargate.model.entity.Letter;
 import com.ssafy.stargate.model.entity.Meeting;
@@ -39,10 +35,10 @@ public class LetterServiceImpl implements LetterService{
 
     @Autowired
     private PMemberRepository pMemberRepository;
-    
+
     /**
      * 편지 작성해서 저장
-     * @param dto LetterCreateRequestDto 팬유저가 작성한 편지 정보 담는 dto
+     * @param dto LetterDto 팬유저가 작성한 편지 정보 담는 dto
      * @return LetterDto 저장된 편지 정보 dto
      * @throws NotFoundException 존재하지 않는 회원, 존재하지 않는 멤버, 존재하지 않는 팬미팅 에러
      */
@@ -76,14 +72,14 @@ public class LetterServiceImpl implements LetterService{
 
     /**
      * 편지 수정
-     * @param dto 편지 정보가 저장된 dto
+     * @param dto LetterDto 편지 정보가 저장된 dto
      * @return LetterDto 수정 완료된 편지 정보 담는 dto
      * @throws NotFoundException 존재하지 않는 편지 에러
      */
     @Override
     public LetterDto updateLetter(LetterDto dto) throws NotFoundException {
 
-        Letter letter = letterRepository.findById(dto.getNo()).orElseThrow();
+        Letter letter = letterRepository.findById(dto.getNo()).orElse(null);
 
         if(letter != null){
             letter.setContents(dto.getContents());
@@ -107,7 +103,7 @@ public class LetterServiceImpl implements LetterService{
 
     /**
      * 편지 삭제
-     * @param dto LetterDeleteRequestDto 삭제하려는 편지 번호 정보를 담는 dto
+     * @param dto LetterDto 삭제하려는 편지 번호 정보를 담는 dto
      */
     @Override
     public void deleteLetter(LetterDto dto){
@@ -140,13 +136,13 @@ public class LetterServiceImpl implements LetterService{
 
     /**
      * 팬미팅 번호를 기준으로 편지들 정보 조회
-     * @param dto LetterFindRequestDto 편지 찾기 위한 dto
+     * @param dto LetterDto 편지 찾기 위한 dto
      * @return List<LetterDto> 팬미팅에 보내진 편지 목록
      */
     @Override
     public List<LetterDto> getLetterByMeeting(LetterDto dto) {
 
-        List<Letter> letters = letterRepository.findByMeeting_Uuid(dto.getUuid()).orElseThrow();
+        List<Letter> letters = letterRepository.findByMeeting_Uuid(dto.getUuid()).orElse(null);
 
         return letters.stream().map((Letter -> LetterDto.builder()
                 .no(Letter.getNo())
@@ -162,7 +158,7 @@ public class LetterServiceImpl implements LetterService{
 
     /**
      * 연예인 번호를 기준으로 편지들 정보 조회
-     * @param dto LetterFindRequestDto 편지 찾기 위한 dto
+     * @param dto LetterDto 편지 찾기 위한 dto
      * @return List<LetterDto> 연예인에게 보내진 편지 목록
      */
     @Override

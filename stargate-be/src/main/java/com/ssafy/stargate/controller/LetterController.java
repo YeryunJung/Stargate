@@ -2,10 +2,6 @@ package com.ssafy.stargate.controller;
 
 import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.LetterDto;
-import com.ssafy.stargate.model.dto.request.LetterCreateRequestDto;
-import com.ssafy.stargate.model.dto.request.LetterDeleteRequestDto;
-import com.ssafy.stargate.model.dto.request.LetterFindRequestDto;
-import com.ssafy.stargate.model.dto.request.LetterUpdateRequestDto;
 import com.ssafy.stargate.model.service.LetterService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 편지 관리 수행하는 컨트롤러

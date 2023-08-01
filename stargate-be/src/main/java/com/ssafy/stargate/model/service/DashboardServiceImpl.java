@@ -84,8 +84,10 @@ public class DashboardServiceImpl implements DashboardService{
 
             List<Meeting> meetingList = meetingRepository.findAllByEmail(email).orElse(null);
 
-            for(Meeting meeting : meetingList){
-                classifyMeetings(meeting);
+            if(meetingList != null){
+                for(Meeting meeting : meetingList){
+                    classifyMeetings(meeting);
+                }
             }
         }else{
             throw new NotFoundException("해당하는 AUTH 는 유효하지 않습니다.");

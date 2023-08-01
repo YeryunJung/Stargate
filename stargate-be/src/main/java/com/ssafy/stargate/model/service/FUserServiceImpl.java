@@ -144,11 +144,13 @@ public class FUserServiceImpl implements FUserService {
                 .birthday(fUser.getBirthday())
                 .build();
     }
-    
+
+
     /**
      * FUser 회원 정보 수정
      * @param fUserDto FUserDto 회원 email 정보가 담긴 FUserDto 객체
      * @param principal Principal 유저 email이 포함된 principal 객체
+     * @return FUserDto 업데이트된 회원 정보 dto
      * @throws NotFoundException 존재하지 않는 회원 에러
      */
     @Override
@@ -211,8 +213,7 @@ public class FUserServiceImpl implements FUserService {
     }
     
     /**
-     * TODO : 이메일로 인증 번호 보내기 ( 싸피에서 할 수 없어요,,, ) 인증번호 생성, 저장까지는 완료
-     * 비밀번호 찾기를 위한 인증 번호 생성, 저장 및 이메일 전송 
+     * 비밀번호 찾기를 위한 인증 번호 생성해서 DB 에 저장 및 해당 인증 번호를 팬유저 이메일로 전송
      * @param dto FUserFindPwDto 회원 이메일 정보가 담긴 객체
      * @return FUserFindPwDto 이메일이 일치하는 회원에게 전송할 인증번호가 저장된 객체
      * @throws NotFoundException 존재하지 않는 회원 에러
@@ -237,7 +238,6 @@ public class FUserServiceImpl implements FUserService {
 
             Certify savedCertify = certifyRepository.save(code);
             fUser.setCertify(savedCertify);
-
 
             sendCodeByMail(username, dto.getEmail(), certify);
 
