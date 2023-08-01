@@ -28,7 +28,6 @@ public class MeetingDto {
     private String notice;
     private List<MeetingFUserBridgeDto> meetingFUsers;
     private List<MeetingMemberBridgeDto> meetingMembers;
-    private MultipartFile imageFile;
 
     public static MeetingDto entityToDto(Meeting meeting) {
         return MeetingDto.builder()

@@ -29,7 +29,7 @@ public class MeetingDetailResponseDto {
     private SavedFileDto imageFileInfo;
     private List<MeetingFUser> meetingFUsers;
     private List<MeetingMember> meetingMembers;
-    private Long groupNo;
+    private long groupNo;
     private String groupName;
 
     @SuperBuilder
