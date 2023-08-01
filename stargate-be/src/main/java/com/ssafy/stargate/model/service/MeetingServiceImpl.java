@@ -361,12 +361,12 @@ public class MeetingServiceImpl implements MeetingService {
         try {
             // create or update (target)
             for (MeetingMemberBridge tg : target) {
-                Optional<MeetingMemberBridge> meetingMemberOptional = source.stream()
+                Optional<MeetingMemberBridge> optionalMeetingMember = source.stream()
                         .filter(org -> org.getPMember().getMemberNo() == tg.getPMember().getMemberNo())
                         .findFirst();
 
-                if (meetingMemberOptional.isPresent()) {
-                    MeetingMemberBridge meetingMember = meetingMemberOptional.get();
+                if (optionalMeetingMember.isPresent()) {
+                    MeetingMemberBridge meetingMember = optionalMeetingMember.get();
                     // update source
                     meetingMember.setOrderNum(tg.getOrderNum());
                     meetingMemberRepository.save(meetingMember);
@@ -414,12 +414,12 @@ public class MeetingServiceImpl implements MeetingService {
         try {
             // create or update (target)
             for (MeetingFUserBridge tg : target) {
-                Optional<MeetingFUserBridge> meetingFUserOptional = source.stream()
+                Optional<MeetingFUserBridge> optionalMeetingFUser = source.stream()
                         .filter(org -> org.getEmail().equals(tg.getEmail()))
                         .findFirst();
 
-                if (meetingFUserOptional.isPresent()) {
-                    MeetingFUserBridge meetingFuser = meetingFUserOptional.get();
+                if (optionalMeetingFUser.isPresent()) {
+                    MeetingFUserBridge meetingFuser = optionalMeetingFUser.get();
                     // update source
                     meetingFuser.setOrderNum(tg.getOrderNum());
                     meetingFUserRepository.save(meetingFuser);
