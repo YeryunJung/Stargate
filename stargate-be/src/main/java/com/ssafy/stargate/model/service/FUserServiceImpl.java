@@ -213,7 +213,7 @@ public class FUserServiceImpl implements FUserService {
     }
     
     /**
-     * 비밀번호 찾기를 위한 인증 번호 생성해서 DB 에 저장 및 해당 인증 번호를 팬유저 이메일로 전송
+     * 비밀번호 찾기를 위한 인증 번호 생성해서 DB 에 저장 및 해당 인증 번호를 팬 유저 이메일로 전송 
      * @param dto FUserFindPwDto 회원 이메일 정보가 담긴 객체
      * @return FUserFindPwDto 이메일이 일치하는 회원에게 전송할 인증번호가 저장된 객체
      * @throws NotFoundException 존재하지 않는 회원 에러
