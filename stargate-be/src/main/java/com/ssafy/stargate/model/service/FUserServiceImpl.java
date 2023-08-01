@@ -241,12 +241,22 @@ public class FUserServiceImpl implements FUserService {
 
 
         if(fUser != null){
+
+            Certify existingUser = certifyRepository.findByfUserEmail(dto.getEmail()).orElse(null);
+
             String certify = RandomStringUtils.randomNumeric(6);
 
-            Certify code = Certify.builder()
-                    .code(certify)
-                    .fUser(fUser)
-                    .build();
+            Certify code;
+
+            if(existingUser == null){
+                code = Certify.builder()
+                        .code(certify)
+                        .fUser(fUser)
+                        .build();
+            }else{
+                existingUser.setCode(certify);
+                code = certifyRepository.save(existingUser);
+            }
 
             Certify savedCertify = certifyRepository.save(code);
             fUser.setCertify(savedCertify);
