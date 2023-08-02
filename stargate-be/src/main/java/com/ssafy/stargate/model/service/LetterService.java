@@ -13,8 +13,6 @@ public interface LetterService {
 
     public LetterDto writeLetter(LetterDto dto) throws NotFoundException;
 
-//    public LetterDto updateLetter(LetterDto dto) throws NotFoundException;
-
     public void deleteLetter(LetterDto dto);
 
     public LetterDto getLetter(Long no) throws NotFoundException;

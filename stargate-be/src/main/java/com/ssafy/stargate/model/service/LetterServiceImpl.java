@@ -37,7 +37,7 @@ public class LetterServiceImpl implements LetterService{
     private PMemberRepository pMemberRepository;
 
     /**
-     * 편지 작성해서 저장
+     * 편지 작성해서 저장 및 수정
      * @param dto LetterDto 팬유저가 작성한 편지 정보 담는 dto
      * @return LetterDto 저장된 편지 정보 dto
      * @throws NotFoundException 존재하지 않는 회원, 존재하지 않는 멤버, 존재하지 않는 팬미팅 에러
@@ -45,7 +45,7 @@ public class LetterServiceImpl implements LetterService{
     @Override
     public LetterDto writeLetter(LetterDto dto) throws NotFoundException {
 
-        Letter letter = letterRepository.findByMeetingUuidAndPMemberMemberNoAndFUserEmail(dto.getUuid(), dto.getMemberNo(), dto.getEmail()).orElse(null);
+        Letter letter = letterRepository.findLetter(dto.getEmail(), dto.getMemberNo(), dto.getUuid()).orElse(null);
 
         if(letter == null){
 
@@ -76,37 +76,7 @@ public class LetterServiceImpl implements LetterService{
                 .createDate(savedLetter.getCreateDate())
                 .build();
     }
-
-    /**
-     * 편지 수정
-     * @param dto LetterDto 편지 정보가 저장된 dto
-     * @return LetterDto 수정 완료된 편지 정보 담는 dto
-     * @throws NotFoundException 존재하지 않는 편지 에러
-     */
-//    @Override
-//    public LetterDto updateLetter(LetterDto dto) throws NotFoundException {
-//
-//        Letter letter = letterRepository.findById(dto.getNo()).orElse(null);
-//
-//        if(letter != null){
-//            letter.setContents(dto.getContents());
-//
-//        }else{
-//            throw new NotFoundException("해당하는 편지가 없습니다.");
-//        }
-//
-//        Letter updatedLetter = letterRepository.save(letter);
-//
-//        return LetterDto.builder()
-//                .no(updatedLetter.getNo())
-//                .contents(updatedLetter.getContents())
-//                .email(updatedLetter.getFUser().getEmail())
-//                .memberNo(updatedLetter.getPMember().getMemberNo())
-//                .uuid(updatedLetter.getMeeting().getUuid())
-//                .createDate(updatedLetter.getCreateDate())
-//                .editDate(updatedLetter.getEditDate())
-//                .build();
-//    }
+    
 
     /**
      * 편지 삭제
