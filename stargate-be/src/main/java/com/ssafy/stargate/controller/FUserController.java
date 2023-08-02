@@ -176,6 +176,12 @@ public class FUserController {
         return ResponseEntity.ok(null);
     }
 
+    /**
+     * 해당 팬미팅의 리마인드 정보를 가져온다.
+     * @param uuid [UUID] 미팅 uuid
+     * @param principal [Principal] 유저 email이 담긴 객체
+     * @return [ResponseEntity<RemindResponseDto>] 리마인드 정보를 담은 dto
+     */
     @GetMapping("/remind/{uuid}")
     public ResponseEntity<RemindResponseDto> getRemind(@PathVariable UUID uuid, Principal principal) {
         RemindResponseDto remindResponseDto = fUserService.getRemind(uuid, principal);

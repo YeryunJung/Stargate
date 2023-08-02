@@ -350,13 +350,18 @@ public class FUserServiceImpl implements FUserService {
 
     }
 
+    /**
+     * 해당 팬미팅의 리마인드 정보를 가져온다.
+     * @param uuid [UUID] 미팅 uuid
+     * @param principal [Principal] 유저 email이 담긴 객체
+     * @return [ResponseEntity<RemindResponseDto>] 리마인드 정보를 담은 dto
+     */
     @Override
     public RemindResponseDto getRemind(UUID uuid, Principal principal) {
         String email = principal.getName();
         Meeting meeting = getMeeting(uuid);
 
         PGroup group = getGroup(meeting);
-
         List<MeetingMemberBridge> meetingMembers = meeting.getMeetingMembers();
         List<RemindResponseDto.MeetingMemberDto> meetingMemberDtos = getMeetingMemberList(meetingMembers, email,uuid);
         return RemindResponseDto.builder()
@@ -422,7 +427,6 @@ public class FUserServiceImpl implements FUserService {
      * 미팅 정보를 가져온다.
      *
      * @param uuid  [UUID] 미팅 uuid (id)
-     * @param email [String] 소속사 email (id)
      * @return [Meeting] 미팅 데이터
      * @throws NotFoundException 데이터 찾기 실패 에러
      */

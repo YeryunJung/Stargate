@@ -222,6 +222,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     /**
      * 미팅 정보를 가져온다.
+     * 미팅을 만든 해당 소속사만 미팅 정보를 변경할 수 있도록 소속사 email (id)와 함께 찾는다.
      *
      * @param uuid  [UUID] 미팅 uuid (id)
      * @param email [String] 소속사 email (id)
