@@ -10,7 +10,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Polaroid {
+public class Polaroid extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long no;
