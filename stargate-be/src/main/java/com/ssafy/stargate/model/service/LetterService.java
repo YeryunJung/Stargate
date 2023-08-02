@@ -11,9 +11,9 @@ import java.util.List;
  */
 public interface LetterService {
 
-    public LetterDto createLetter(LetterDto dto) throws NotFoundException;
+    public LetterDto writeLetter(LetterDto dto) throws NotFoundException;
 
-    public LetterDto updateLetter(LetterDto dto) throws NotFoundException;
+//    public LetterDto updateLetter(LetterDto dto) throws NotFoundException;
 
     public void deleteLetter(LetterDto dto);
 

@@ -17,4 +17,6 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     Optional<List<Letter>> findByfUserEmail(String email);
 
+    
+
 }
