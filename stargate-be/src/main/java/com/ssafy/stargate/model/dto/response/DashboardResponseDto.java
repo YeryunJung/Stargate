@@ -16,7 +16,7 @@ import lombok.*;
 @ToString
 public class DashboardResponseDto {
 
-    List<DashboardMeetingResponseDto> today;
-    List<DashboardMeetingResponseDto> future;
-    List<DashboardMeetingResponseDto> past;
+    List<DashboardMeetingResponseDto> expected;
+    List<DashboardMeetingResponseDto> ongoing;
+    List<DashboardMeetingResponseDto> finished;
 }

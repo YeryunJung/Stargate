@@ -10,6 +10,7 @@ import com.ssafy.stargate.model.entity.MeetingFUserBridge;
 import com.ssafy.stargate.model.repository.MeetingFUserRepository;
 import com.ssafy.stargate.model.repository.MeetingRepository;
 import com.ssafy.stargate.util.FileUtil;
+import com.ssafy.stargate.util.TimeUtil;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,19 +40,24 @@ public class DashboardServiceImpl implements DashboardService{
     @Autowired
     MeetingFUserRepository meetingFUserRepository;
 
-    List<DashboardMeetingResponseDto> todayMeetings;
-
-    List<DashboardMeetingResponseDto> futureMeetings;
-
-    List<DashboardMeetingResponseDto> pastMeetings;
-
-    LocalDateTime today;
+    @Autowired
+    TimeUtil timeUtil;
 
     @Autowired
     private FileUtil fileUtil;
 
     @Value("${s3.filepath.meeting}")
     private String filePath;
+
+    List<DashboardMeetingResponseDto> ongoingMeetings;
+
+    List<DashboardMeetingResponseDto> expectedMeetings;
+
+    List<DashboardMeetingResponseDto> finishedMeetings;
+
+    LocalDateTime today;
+
+
 
     /**
      * 회원 (email) 와 관련된 meeting 정보 조회 
@@ -69,9 +75,9 @@ public class DashboardServiceImpl implements DashboardService{
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = (UsernamePasswordAuthenticationToken) authentication;
 
-        todayMeetings = new ArrayList<>();
-        futureMeetings = new ArrayList<>();
-        pastMeetings = new ArrayList<>();
+        ongoingMeetings = new ArrayList<>();
+        expectedMeetings = new ArrayList<>();
+        finishedMeetings = new ArrayList<>();
         today = LocalDateTime.now();
 
         String auth = usernamePasswordAuthenticationToken.getAuthorities().stream().toList().get(0).getAuthority().toString();
@@ -106,10 +112,10 @@ public class DashboardServiceImpl implements DashboardService{
             throw new NotFoundException("해당하는 AUTH 는 유효하지 않습니다.");
         }
         return DashboardResponseDto.builder()
-            .today(todayMeetings)
-            .past(pastMeetings)
-            .future(futureMeetings)
-            .build();
+                .ongoing(ongoingMeetings)
+                .expected(expectedMeetings)
+                .finished(finishedMeetings)
+                .build();
     }
 
     /**
@@ -117,17 +123,28 @@ public class DashboardServiceImpl implements DashboardService{
      * @param meeting Meeting 미팅 정보
      */
     private void classifyMeetings(Meeting meeting){
+
+        //          미팅 시작 - 현재 > 0 : 예정
+        //          미팅 시작 - 현재 < 0:
+        //              1) 진행 중 -> (미팅 시작 - 현재) + 총 미팅 시간 > 0 : 진행 중
+        //              2) (미팅 시작 - 현재) + 총 미팅 시간 <= 0 : 완료
+        //         총 미팅 시간 : ( 미팅 시간 + 대기시간 ) * 미팅 팬 유저(가입한 사람)
         
         if(meeting != null){
 
-            if(meeting.getStartDate().getDayOfYear() == today.getDayOfYear()){
-                todayMeetings.add(setMeetingInfo(meeting));
+            long remainingSecond = timeUtil.getRemaingSeconds(meeting.getStartDate());
+            long totalMeetingTime = (meeting.getMeetingTime() + meeting.getWaitingTime()) * meetingFUserRepository.countRegisteredFUsers(meeting.getUuid());
 
-            }else if(meeting.getStartDate().isBefore(today)){
-                pastMeetings.add(setMeetingInfo(meeting));
-
-            }else if(meeting.getStartDate().isAfter(today)){
-                futureMeetings.add(setMeetingInfo(meeting));
+            if(remainingSecond> 0){
+                expectedMeetings.add(setMeetingInfo(meeting , remainingSecond));
+            }else{
+                log.info("totalMeetingTime : {}", totalMeetingTime);
+                log.info("remainingSecond + totalMeetingTime : {}", remainingSecond + totalMeetingTime);
+                if(remainingSecond + totalMeetingTime > 0){
+                    ongoingMeetings.add(setMeetingInfo(meeting, remainingSecond));
+                }else{
+                    finishedMeetings.add(setMeetingInfo(meeting, remainingSecond));
+                }
             }
         }
     }
@@ -137,28 +154,18 @@ public class DashboardServiceImpl implements DashboardService{
      * @param meeting Meeting 미팅 정보
      * @return DashboardMeetingResponseDto 대시보드에 있는 미팅 정보 담는 dto
      */
-    private DashboardMeetingResponseDto setMeetingInfo(Meeting meeting){
+    private DashboardMeetingResponseDto setMeetingInfo(Meeting meeting, long remainingSecond){
 
         SavedFileDto savedFileDto = fileUtil.getFileInfo(filePath, meeting.getImage());
 
-        long remainingTimeMilli = meeting.getStartDate().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli() -LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli();
-        long remainingTimeSecond =  TimeUnit.MILLISECONDS.toSeconds(remainingTimeMilli);
+        log.info("초 : {}",remainingSecond);
 
-        if(remainingTimeSecond >= 0){
             return DashboardMeetingResponseDto.builder()
                     .uuid(meeting.getUuid())
                     .name(meeting.getName())
                     .startDate(meeting.getStartDate())
-                    .remainingTime(remainingTimeSecond)
+                    .remainingTime(remainingSecond)
                     .imageFileInfo(savedFileDto)
                     .build();
-        }else{
-            return DashboardMeetingResponseDto.builder()
-                    .uuid(meeting.getUuid())
-                    .name(meeting.getName())
-                    .startDate(meeting.getStartDate())
-                    .imageFileInfo(savedFileDto)
-                    .build();
-        }
     }
 }
