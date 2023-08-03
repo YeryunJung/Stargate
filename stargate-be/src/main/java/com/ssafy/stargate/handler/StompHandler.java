@@ -31,9 +31,9 @@ public class StompHandler implements ChannelInterceptor {
 
         if(StompCommand.CONNECT.equals(accessor.getCommand())){
 
-            String token = jwtTokenUtil.removeBearer(extractAccessor(accessor));
-
-            jwtTokenUtil.validateToken(token);
+//            String token = ""
+//
+//            jwtTokenUtil.validateToken(token);
         }
         return message;
     }

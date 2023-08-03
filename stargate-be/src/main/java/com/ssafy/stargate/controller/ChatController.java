@@ -15,10 +15,11 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RestController;
 
 
-@RestController
+@Controller
 @Slf4j
 @RequiredArgsConstructor
 public class ChatController {
@@ -26,8 +27,9 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
-    @MessageMapping("/hello")
-    @SendTo("/sub/chat")
+    // requestmapping 과 비슷
+    @MessageMapping("/hello")  //app/hello
+    @SendTo("/topic/chat")    // handler 에서 처리 마친 것을 topic/chat 경로로 전송
     public void message(@Payload MessageDto message){
 
         chatService.send(message);

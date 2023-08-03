@@ -17,6 +17,6 @@ public class ChatServiceImpl implements ChatService{
     @Override
     public void send(MessageDto message) {
 
-        template.convertAndSend("/sub/chat/message", message);
+        template.convertAndSend("/topic/chat", message);
     }
 }
