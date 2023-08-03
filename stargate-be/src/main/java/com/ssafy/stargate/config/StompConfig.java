@@ -15,8 +15,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class StompConfig implements WebSocketMessageBrokerConfigurer {
 
-    @Autowired
-    private StompHandler stompHandler;
+//    @Autowired
+//    private StompHandler stompHandler;
 
     /**
      * 엔드 포인트 설정
@@ -36,16 +36,17 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
 
 
-        // 스프링에서 제공하는 내장 브로커 사용, pub 가 붙은 메세지가 송신되었을 때 브로커가 메세지를 구독자에게 전달
+        // 스프링에서 제공하는 내장 브로커 사용, topic 가 붙은 메세지가 송신되었을 때 브로커가 메세지를 구독자에게 전달
         registry.enableSimpleBroker("/topic");
 
         // 메세지 핸들러로 라우팅 되는 prefix
         registry.setApplicationDestinationPrefixes("/app");
     }
 
-    @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(stompHandler);
-    }
+//    stompHandler 주석 처리 했을때 되는 것 확인!!!!
+//    @Override
+//    public void configureClientInboundChannel(ChannelRegistration registration) {
+//        registration.interceptors(stompHandler);
+//    }
 
 }
