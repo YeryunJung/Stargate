@@ -14,6 +14,9 @@ import org.springframework.stereotype.Repository;
 public interface MeetingFUserRepository extends JpaRepository<MeetingFUserBridge, Long> {
     Optional<List<MeetingFUserBridge>> findByEmail(String email);
 
-    @Query("SELECT mub from MeetingFUserBridge mub where mub.email = :email and mub.meeting.uuid = :uuid")
+    @Query("SELECT mub from MeetingFUserBridge mub where mub.email = :email and mub.meeting.uuid = :uuid order by mub.orderNum")
     Optional<MeetingFUserBridge> findByEmailAndUuid(@Param("email") String fanEmail, @Param("uuid") UUID meetingUuid);
+
+    @Query("SELECT count(*) from MeetingFUserBridge mub join FUser f on mub.email = f.email where mub.meeting.uuid = :uuid and mub.orderNum < :orderNum order by mub.orderNum")
+    int countRegisteredFUsersLessThanOrderNum(@Param("uuid") UUID meetingUuid, @Param("orderNum") int orderNum);
 }
