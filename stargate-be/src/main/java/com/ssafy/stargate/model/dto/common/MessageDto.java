@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ChatDto {
+public class MessageDto {
 
     private String roomNo;
     private String email;
