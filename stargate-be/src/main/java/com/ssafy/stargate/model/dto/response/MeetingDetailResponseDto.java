@@ -39,7 +39,7 @@ public class MeetingDetailResponseDto {
     @NoArgsConstructor
     @ToString
     public static class MeetingFUser extends MeetingFUserBridgeDto {
-        private boolean isRegister;
+        private Boolean isRegister;
         private String name;
     }
 
