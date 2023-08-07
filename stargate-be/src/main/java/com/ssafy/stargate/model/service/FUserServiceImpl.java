@@ -55,9 +55,6 @@ public class FUserServiceImpl implements FUserService {
     private CertifyRepository certifyRepository;
 
     @Autowired
-    private JwtTokenRepository jwtTokenRepository;
-
-    @Autowired
     private JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")
@@ -68,6 +65,9 @@ public class FUserServiceImpl implements FUserService {
 
     @Autowired
     private FileUtil fileUtil;
+
+    @Autowired
+    private JwtTokenRepository jwtTokenRepository;
 
     @Value("polaroid")
     private String polaroidFilePath;
@@ -116,12 +116,12 @@ public class FUserServiceImpl implements FUserService {
 
             String accessToken = jwtTokenUtil.createAccessToken(fUser.getEmail(), "USER");
 
-            JwtToken jwtToken = JwtToken.builder()
+            JwtToken token = JwtToken.builder()
                     .email(dto.getEmail())
                     .refreshToken(refreshToken)
                     .build();
 
-            jwtTokenRepository.save(jwtToken);
+            jwtTokenRepository.save(token);
 
             return JwtResponseDto.builder()
                     .refreshToken(refreshToken)
@@ -216,7 +216,7 @@ public class FUserServiceImpl implements FUserService {
      */
     @Override
     public FUserFindIdDto getFUserId(FUserFindIdDto dto) throws NotFoundException {
-        FUser fUser = fUserRepository.findByName(dto.getName()).orElseThrow(() -> new NotFoundException("아이디 찾기 실패 : 해당 아이디와 일치 하는 회원이 없습니다."));
+        FUser fUser = fUserRepository.findByNameAndPhone(dto.getName(), dto.getPhone()).orElseThrow(() -> new NotFoundException("아이디 찾기 실패 : 해당 아이디와 일치 하는 회원이 없습니다."));
 
         if (fUser == null || !fUser.getPhone().equals(dto.getPhone())) {
             throw new NotFoundException("입력하신 아이디, 전화번호와 일치하는 회원 정보가 없습니다.");
@@ -286,13 +286,13 @@ public class FUserServiceImpl implements FUserService {
     public void checkCertify(FUserFindPwDto dto) throws LoginException, NotFoundException {
         String code = dto.getCode();
 
-        FUser fUser = certifyRepository.findById(dto.getCode()).get().getFUser();
+        Certify certify = certifyRepository.findByfUserEmail(dto.getEmail()).orElse(null);
 
-        if (fUser == null) {
+        if (certify == null) {
             throw new NotFoundException("해당하는 회원 정보를 찾지 못했습니다.");
         }
 
-        if (!dto.getEmail().equals(fUser.getEmail())) {
+        if (!dto.getCode().equals(certify.getCode())) {
             throw new LoginException("인증 번호가 일치하지 않습니다.");
         }
     }
@@ -340,7 +340,7 @@ public class FUserServiceImpl implements FUserService {
      */
     @Override
     public void logout() throws NotFoundException {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName().toString();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         JwtToken refreshToken = jwtTokenRepository.findById(email).orElse(null);
 
@@ -350,6 +350,7 @@ public class FUserServiceImpl implements FUserService {
             throw new NotFoundException("해당 유저는 이미 로그아웃 상태입니다.");
         }
 
+        log.info("로그아웃 되었습니다");
     }
 
     /**
