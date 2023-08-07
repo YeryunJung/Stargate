@@ -340,8 +340,7 @@ public class FUserServiceImpl implements FUserService {
      */
     @Override
     public void logout() throws NotFoundException {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName().toString();
-
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
 
         JwtToken refreshToken = jwtTokenRepository.findById(email).orElse(null);
 
