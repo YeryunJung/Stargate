@@ -19,7 +19,7 @@ public interface ChatService {
 
     public List<ChatMessageDto> getChattingMessages(ChattingRoomRequestDto dto);
 
-    public void sendMessage(ChatMessageDto dto);
+    public void sendMessage(ChatMessageDto dto, Long roomNo);
 
     public void deleteMessage(ChatMessageDto dto);
 

@@ -104,7 +104,7 @@ public class ChatServiceImpl implements ChatService{
                 .no(chatMessage.getNo())
                 .roomNo(chatMessage.getChattingRoom().getRoomNo())
                 .writer(chatMessage.getNickname() != null ? chatMessage.getNickname() : chatMessage.getEmail())
-                .message(chatMessage.getContent())
+                .message(chatMessage.getMessage())
                 .createDate(chatMessage.getCreateDate())
                 .editDate(chatMessage.getEditDate())
                 .build()))
@@ -118,16 +118,16 @@ public class ChatServiceImpl implements ChatService{
      * @param message ChatMessageDto 작성된 메세지가 저장된 dto
      */
     @Override
-    public void sendMessage(ChatMessageDto message) {
+    public void sendMessage(ChatMessageDto message, Long roomNo) {
 
         messageSendingOperations.convertAndSend("/topic/chat" + message.getRoomNo(), message);
 
-        ChattingRoom chattingRoom = chattingRoomRepository.findById(message.getRoomNo()).orElseThrow(() -> new NotFoundException("해당하는 채팅룸은 존재하지 않습니다"));
+        ChattingRoom chattingRoom = chattingRoomRepository.findById(roomNo).orElseThrow(() -> new NotFoundException("해당하는 채팅룸은 존재하지 않습니다"));
 
         ChatMessage.ChatMessageBuilder chatMessage = ChatMessage.builder()
                 .no(message.getNo())
                 .chattingRoom(chattingRoom)
-                .content(message.getMessage());
+                .message(message.getMessage());
 
         if(message.getWriter().contains("@")){
             chatMessage.email(message.getWriter());
@@ -157,14 +157,14 @@ public class ChatServiceImpl implements ChatService{
     public ChatMessageDto updateMessage(ChatMessageDto dto) {
         ChatMessage chatMessage = chatMessageRepository.findById(dto.getNo()).orElseThrow(() -> new NotFoundException("해당 하는 메세지가 존재하지 않습니다."));
 
-        chatMessage.setContent(dto.getMessage());
+        chatMessage.setMessage(dto.getMessage());
 
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
         return ChatMessageDto.builder()
                 .no(savedChatMessage.getNo())
                 .roomNo(savedChatMessage.getChattingRoom().getRoomNo())
-                .message(savedChatMessage.getContent())
+                .message(savedChatMessage.getMessage())
                 .writer(savedChatMessage.getNickname() != null ? savedChatMessage.getNickname() : savedChatMessage.getEmail())
                 .createDate(savedChatMessage.getCreateDate())
                 .editDate(savedChatMessage.getEditDate())

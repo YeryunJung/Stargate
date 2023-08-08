@@ -55,7 +55,7 @@ public class ChatController {
     @MessageMapping("/chat/{roomNo}")  //app/chat/{roomNo}
     @SendTo("/topic/chat/{roomNo}")    // handler 에서 처리 마친 것을 topic/chat 경로로 전송
     public void message (@Payload ChatMessageDto message, @DestinationVariable(value = "roomNo") Long roomNo){
-        chatService.sendMessage(message);
+        chatService.sendMessage(message, roomNo);
     }
 
     @DeleteMapping("/chat/message")
