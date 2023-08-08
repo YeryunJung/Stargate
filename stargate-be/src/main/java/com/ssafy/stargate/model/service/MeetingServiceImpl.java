@@ -127,22 +127,15 @@ public class MeetingServiceImpl implements MeetingService {
                             .orElseThrow(() -> new NotFoundException("소속사가 존재하지 않습니다.")))
                     .build();
 
-            System.out.println("--------------------------------------------------------");
-            System.out.println(dto.getParsedMeetingMembers());
-
-
-            List<MeetingMemberBridge> meetingMembers = dtoToMeetingMemberList(meeting, dto.getParsedMeetingMembers());
-
+            List<MeetingMemberBridge> meetingMembers = dtoToMeetingMemberList(meeting, MeetingDto.getParsedMeetingMembers(dto.getMeetingMembers()));
             meetingMemberRepository.saveAll(meetingMembers);
             meeting.setMeetingMembers(meetingMembers);
 
-
-            List<MeetingFUserBridge> meetingFUsers = dtoToMeetingFUserList(meeting, dto.getParsedMeetingFUsers());
+            List<MeetingFUserBridge> meetingFUsers = dtoToMeetingFUserList(meeting, MeetingDto.getParsedMeetingFUsers(dto.getMeetingFUsers()));
             meetingFUserRepository.saveAll(meetingFUsers);
             meeting.setMeetingFUsers(meetingFUsers);
 
             meetingRepository.save(meeting);
-
             return MeetingDto.entityToDto(meeting);
         } catch (Exception e) {
             e.printStackTrace();
@@ -183,11 +176,11 @@ public class MeetingServiceImpl implements MeetingService {
             meeting.setImage(newFilename);
 
             List<MeetingMemberBridge> meetingMembers = meeting.getMeetingMembers();
-            List<MeetingMemberBridge> newMeetingMembers = dtoToMeetingMemberList(meeting, dto.getParsedMeetingMembers());
+            List<MeetingMemberBridge> newMeetingMembers = dtoToMeetingMemberList(meeting, MeetingDto.getParsedMeetingMembers(dto.getMeetingMembers()));
             updateMeetingMemberList(meetingMembers, newMeetingMembers);
 
             List<MeetingFUserBridge> meetingFUsers = meeting.getMeetingFUsers();
-            List<MeetingFUserBridge> newMeetingFUsers = dtoToMeetingFUserList(meeting, dto.getParsedMeetingFUsers());
+            List<MeetingFUserBridge> newMeetingFUsers = dtoToMeetingFUserList(meeting, MeetingDto.getParsedMeetingFUsers(dto.getMeetingFUsers()));
             updateMeetingFUserList(meetingFUsers, newMeetingFUsers);
 
             fileUtil.deleteFile(filePath, filename);
@@ -310,6 +303,7 @@ public class MeetingServiceImpl implements MeetingService {
 
     /**
      * 미팅 멤버 dto 리스트를 통해 미팅 멤버 엔티티 리스트를 만든다.
+     * 리스트 순서대로 orderNum을 정해준다. (0부터 시작)
      *
      * @param meeting           [Meeting] 미팅
      * @param meetingMemberDtos [List<MeetingMemberBridgeDto>] 미팅 멤버 dto 리스트
@@ -317,22 +311,23 @@ public class MeetingServiceImpl implements MeetingService {
      * @throws NotFoundException NotFoundException 데이터 찾기 실패 에러
      */
     private List<MeetingMemberBridge> dtoToMeetingMemberList(Meeting meeting, List<Long> meetingMemberDtos) throws NotFoundException {
-            log.info("HELP = {}",meetingMemberDtos.get(0).getClass());
-            return IntStream.range(0, meetingMemberDtos.size())
-                    .mapToObj(index -> {
-                        Long memberNo = meetingMemberDtos.get(index); // Corrected code
-                        return MeetingMemberBridge.builder()
-                                .meeting(meeting)
-                                .pMember(pMemberRepository.findById(memberNo)
-                                        .orElseThrow(() -> new NotFoundException("미팅 멤버가 존재하지 않습니다.")))
-                                .orderNum(index)
-                                .build();
-                    })
-                    .toList();
+        log.info("HELP = {}", meetingMemberDtos.get(0).getClass());
+        return IntStream.range(0, meetingMemberDtos.size())
+                .mapToObj(index -> {
+                    Long memberNo = meetingMemberDtos.get(index); // Corrected code
+                    return MeetingMemberBridge.builder()
+                            .meeting(meeting)
+                            .pMember(pMemberRepository.findById(memberNo)
+                                    .orElseThrow(() -> new NotFoundException("미팅 멤버가 존재하지 않습니다.")))
+                            .orderNum(index)
+                            .build();
+                })
+                .toList();
     }
 
     /**
      * 미팅 팬유저 dto 리스트를 통해 미팅 팬유저 엔티티 리스트를 만든다.
+     * 리스트 순서대로 orderNum을 정해준다. (0부터 시작)
      *
      * @param meeting          [Meeting] 미팅
      * @param meetingFUserDtos [List<MeetingMemberBridgeDto>] 미팅 팬유저 dto 리스트
