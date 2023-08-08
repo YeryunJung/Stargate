@@ -136,7 +136,6 @@ public class ChatServiceImpl implements ChatService{
         }
 
         chatMessageRepository.save(chatMessage.build());
-
     }
 
     /**

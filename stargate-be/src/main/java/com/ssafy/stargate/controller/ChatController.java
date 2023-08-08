@@ -2,6 +2,7 @@ package com.ssafy.stargate.controller;
 
 
 
+
 import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.ChatMessageDto;
 import com.ssafy.stargate.model.dto.request.ChattingRoomRequestDto;
@@ -30,7 +31,7 @@ public class ChatController {
     private ChatService chatService;
 
     @PostMapping("/chat/new-room")
-    public ResponseEntity<ChattingRoomResponseDto> createNewRoom(@RequestBody ChattingRoomRequestDto dto){
+    public ResponseEntity<ChattingRoomResponseDto> createNewRoom(@RequestBody ChattingRoomRequestDto dto) {
         return ResponseEntity.ok(chatService.createChattingRoom(dto));
     }
 
@@ -41,30 +42,30 @@ public class ChatController {
 
 
     @GetMapping("/chat/rooms")
-    public ResponseEntity<List<ChattingRoomResponseDto>> getAllRooms(){
+    public ResponseEntity<List<ChattingRoomResponseDto>> getAllRooms () {
         return ResponseEntity.ok(chatService.getAllChattingRoom());
     }
 
     @GetMapping("/chat/messages")
-    public ResponseEntity<List<ChatMessageDto>> getMessages(@RequestBody ChattingRoomRequestDto dto){
+    public ResponseEntity<List<ChatMessageDto>> getMessages (@RequestBody ChattingRoomRequestDto dto){
         return ResponseEntity.ok(chatService.getChattingMessages(dto));
     }
 
     // requestmapping 과 비슷
     @MessageMapping("/chat/{roomNo}")  //app/chat/{roomNo}
     @SendTo("/topic/chat/{roomNo}")    // handler 에서 처리 마친 것을 topic/chat 경로로 전송
-    public void message(@Payload ChatMessageDto message, @DestinationVariable(value = "roomNo") Long roomNo){
+    public void message (@Payload ChatMessageDto message, @DestinationVariable(value = "roomNo") Long roomNo){
         chatService.sendMessage(message);
     }
 
     @DeleteMapping("/chat/message")
-    public ResponseEntity<?> deleteMessage(@RequestBody ChatMessageDto dto){
+    public ResponseEntity<?> deleteMessage (@RequestBody ChatMessageDto dto){
         chatService.deleteMessage(dto);
         return ResponseEntity.ok(null);
     }
 
     @PutMapping("/chat/message")
-    public ResponseEntity<?> updateMessage(@RequestBody ChatMessageDto dto){
+    public ResponseEntity<?> updateMessage (@RequestBody ChatMessageDto dto){
         return ResponseEntity.ok(chatService.updateMessage(dto));
     }
 }
