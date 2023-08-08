@@ -1,5 +1,9 @@
 package com.ssafy.stargate.model.dto.common;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.stargate.exception.ParsingException;
 import com.ssafy.stargate.model.entity.Meeting;
 import com.ssafy.stargate.model.entity.MeetingFUserBridge;
 import com.ssafy.stargate.model.entity.MeetingMemberBridge;
@@ -7,6 +11,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -26,20 +31,40 @@ public class MeetingDto {
     private int meetingTime;
     private int photoNum;
     private String notice;
-    private List<MeetingFUserBridgeDto> meetingFUsers;
-    private List<MeetingMemberBridgeDto> meetingMembers;
+    private String meetingFUsers;
+    private String meetingMembers;
+
+
+    public List<String> getParsedMeetingFUsers() throws ParsingException {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(meetingFUsers, List.class);
+        } catch (IOException e) {
+            throw new ParsingException("MeetingFUsers의 JSON 형태의 문자열을 파싱하는데 실패했습니다.");
+        }
+    }
+
+    public List<Long> getParsedMeetingMembers() throws ParsingException {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(meetingMembers, new TypeReference<List<Long>>(){});
+        } catch (IOException e) {
+            throw new ParsingException("MeetingFMembers의 JSON 형태의 문자열을 파싱하는데 실패했습니다.");
+        }
+    }
+
 
     public static MeetingDto entityToDto(Meeting meeting) {
         return MeetingDto.builder()
                 .uuid(meeting.getUuid())
                 .name(meeting.getName())
-                .startDate(meeting.getStartDate())
+//                .startDate(meeting.getStartDate())
                 .waitingTime(meeting.getWaitingTime())
                 .meetingTime(meeting.getMeetingTime())
                 .notice(meeting.getNotice())
                 .photoNum(meeting.getPhotoNum())
-                .meetingMembers(entityToDtoMeetingMemberList(meeting.getMeetingMembers()))
-                .meetingFUsers(entityToDtoMeetingFUserList(meeting.getMeetingFUsers()))
+//                .meetingMembers(entityToDtoMeetingMemberList(meeting.getMeetingMembers()))
+//                .meetingFUsers(entityToDtoMeetingFUserList(meeting.getMeetingFUsers()))
                 .build();
     }
 
