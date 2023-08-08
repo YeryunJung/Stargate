@@ -157,16 +157,19 @@ public class DashboardServiceImpl implements DashboardService{
 
     /**
      * 미팅 정보 전달하기 위해 dto 에 정보 저장, 이미지 파일 정보 가져와서 dto 에 저장
-     *
+     * 사진이 있을 경우와 없을 경우 분리
      * @param meeting Meeting 미팅 정보
      * @param remainingSecond long 미팅 시작까지 남은 시간
      * @return DashboardMeetingResponseDto 대시보드에 있는 미팅 정보 담는 dto
      */
     private DashboardMeetingResponseDto setMeetingInfo(Meeting meeting, long remainingSecond){
 
-        SavedFileDto savedFileDto = fileUtil.getFileInfo(filePath, meeting.getImage());
 
         log.info("초 : {}",remainingSecond);
+
+        if(meeting.getImage() != null){
+
+            SavedFileDto savedFileDto = fileUtil.getFileInfo(filePath, meeting.getImage());
 
             return DashboardMeetingResponseDto.builder()
                     .uuid(meeting.getUuid())
@@ -175,5 +178,15 @@ public class DashboardServiceImpl implements DashboardService{
                     .remainingTime(remainingSecond)
                     .imageFileInfo(savedFileDto)
                     .build();
+
+        }else{
+
+            return DashboardMeetingResponseDto.builder()
+                    .uuid(meeting.getUuid())
+                    .name(meeting.getName())
+                    .startDate(meeting.getStartDate())
+                    .remainingTime(remainingSecond)
+                    .build();
+        }
     }
 }
