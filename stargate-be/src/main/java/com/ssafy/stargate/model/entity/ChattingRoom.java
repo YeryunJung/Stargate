@@ -18,6 +18,7 @@ public class ChattingRoom extends BaseEntity{
 
     @Id
     @Column(name = "room_no")
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long roomNo;
 
     @Column

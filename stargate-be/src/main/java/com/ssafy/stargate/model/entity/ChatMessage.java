@@ -14,6 +14,7 @@ import lombok.*;
 public class ChatMessage extends BaseEntity{
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long no;
 
     @Column

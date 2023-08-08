@@ -55,7 +55,7 @@ public class ChatServiceImpl implements ChatService{
      * @return ChattingRoomResponseDto 채팅룸 수정된 dto
      */
     @Override
-    public ChattingRoomResponseDto updateChattingRoom(ChattingRoomRequestDto dto) {
+    public ChattingRoomResponseDto updateChattingRoom(ChattingRoomRequestDto dto) throws NotFoundException{
 
         ChattingRoom chattingRoom = chattingRoomRepository.findById(dto.getRoomNo()).orElseThrow(()-> new NotFoundException("해당하는 채팅룸은 존재하지 않습니다"));
 
@@ -122,7 +122,20 @@ public class ChatServiceImpl implements ChatService{
 
         messageSendingOperations.convertAndSend("/topic/chat" + message.getRoomNo(), message);
 
+        ChattingRoom chattingRoom = chattingRoomRepository.findById(message.getRoomNo()).orElseThrow(() -> new NotFoundException("해당하는 채팅룸은 존재하지 않습니다"));
 
+        ChatMessage.ChatMessageBuilder chatMessage = ChatMessage.builder()
+                .no(message.getNo())
+                .chattingRoom(chattingRoom)
+                .content(message.getMessage());
+
+        if(message.getWriter().contains("@")){
+            chatMessage.email(message.getWriter());
+        }else{
+            chatMessage.nickname(message.getWriter());
+        }
+
+        chatMessageRepository.save(chatMessage.build());
 
     }
 

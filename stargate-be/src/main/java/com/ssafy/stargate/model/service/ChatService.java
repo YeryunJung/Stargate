@@ -1,5 +1,6 @@
 package com.ssafy.stargate.model.service;
 
+import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.ChatMessageDto;
 import com.ssafy.stargate.model.dto.request.ChattingRoomRequestDto;
 import com.ssafy.stargate.model.dto.response.ChattingRoomResponseDto;
@@ -10,7 +11,7 @@ public interface ChatService {
 
     public ChattingRoomResponseDto createChattingRoom(ChattingRoomRequestDto dto);
 
-    public ChattingRoomResponseDto updateChattingRoom(ChattingRoomRequestDto dto);
+    public ChattingRoomResponseDto updateChattingRoom(ChattingRoomRequestDto dto) throws NotFoundException;
 
     public List<ChattingRoomResponseDto> getAllChattingRoom();
 
