@@ -3,6 +3,7 @@ package com.ssafy.stargate.controller;
 
 
 
+
 import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.model.dto.common.ChatMessageDto;
 import com.ssafy.stargate.model.dto.request.ChattingRoomRequestDto;
@@ -18,8 +19,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+
 
 
 @Controller
@@ -28,8 +29,8 @@ import java.util.List;
 //@RequestMapping("/chat")
 public class ChatController {
 
-    @Autowired
-    private ChatService chatService;
+    private final ChatService chatService;
+
 
     @PostMapping("/chat/new-room")
     public ResponseEntity<ChattingRoomResponseDto> createNewRoom(@RequestBody ChattingRoomRequestDto dto) {
@@ -40,6 +41,7 @@ public class ChatController {
     public ResponseEntity<ChattingRoomResponseDto> updateChatRoom(@RequestBody ChattingRoomRequestDto dto) throws NotFoundException {
         return ResponseEntity.ok(chatService.updateChattingRoom(dto));
     }
+
 
 
     @GetMapping("/chat/rooms")
