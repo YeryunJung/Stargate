@@ -38,7 +38,7 @@ public class RemindServiceImpl implements RemindService {
 
     public RemindServiceImpl(
             FileUtil fileUtil,
-            @Value("polaroid") String polaroidFilePath,
+            @Value("${s3.filepath.polaroid}") String polaroidFilePath,
             PolaroidRepository polaroidRepository,
             MeetingRepository meetingRepository,
             LetterRepository letterRepository

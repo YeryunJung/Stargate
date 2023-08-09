@@ -72,7 +72,7 @@ public class FUserServiceImpl implements FUserService {
             PolaroidRepository polaroidRepository,
             FileUtil fileUtil,
             JwtTokenRepository jwtTokenRepository,
-            @Value("polaroid") String polaroidFilePath,
+            @Value("${s3.filepath.polaroid}") String polaroidFilePath,
             @Value("${spring.mail.username}") String username
     ) {
         this.fUserRepository = fUserRepository;

@@ -49,7 +49,7 @@ public class PolaroidServiceImpl implements PolaroidService {
             MeetingFUserRepository meetingFUserRepository,
             FUserRepository fUserRepository,
             FileUtil fileUtil,
-            @Value("polaroid") String filePath
+            @Value("${s3.filepath.polaroid}") String filePath
     ) {
         this.polaroidRepository = polaroidRepository;
         this.meetingRepository = meetingRepository;
