@@ -15,8 +15,6 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class StompConfig implements WebSocketMessageBrokerConfigurer {
 
-//    @Autowired
-//    private StompHandler stompHandler;
 
     /**
      * 엔드 포인트 설정
@@ -42,11 +40,5 @@ public class StompConfig implements WebSocketMessageBrokerConfigurer {
         // 메세지 핸들러로 라우팅 되는 prefix
         registry.setApplicationDestinationPrefixes("/app");
     }
-
-//    stompHandler 주석 처리 했을때 되는 것 확인!!!!
-//    @Override
-//    public void configureClientInboundChannel(ChannelRegistration registration) {
-//        registration.interceptors(stompHandler);
-//    }
 
 }
