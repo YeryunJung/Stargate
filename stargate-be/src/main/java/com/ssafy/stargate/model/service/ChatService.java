@@ -19,11 +19,11 @@ public interface ChatService {
 
     public List<ChatMessageDto> getChattingMessages(ChattingRoomRequestDto dto);
 
-    public void sendMessage(ChatMessageDto dto, Long roomNo);
+    public void sendMessage(ChatMessageDto dto, Long roomNo) throws NotFoundException;
 
     public void deleteMessage(ChatMessageDto dto);
 
-    public ChatMessageDto updateMessage(ChatMessageDto dto);
+    public ChatMessageDto updateMessage(ChatMessageDto dto) throws NotFoundException;
 
 
 }

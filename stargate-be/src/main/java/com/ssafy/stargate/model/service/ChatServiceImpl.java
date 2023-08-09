@@ -117,9 +117,11 @@ public class ChatServiceImpl implements ChatService{
     /**
      * 메세지 해당 채팅룸에 전송 및 전송된 메세지 저장
      * @param message ChatMessageDto 작성된 메세지가 저장된 dto
+     * @param roomNo 채팅룸 번호
+     * @throws NotFoundException 메세지를 보내려는 채팅룸이 존재하지 않을 경우 발생하는 에러
      */
     @Override
-    public void sendMessage(ChatMessageDto message, Long roomNo) {
+    public void sendMessage(ChatMessageDto message, Long roomNo) throws NotFoundException {
 
         messageSendingOperations.convertAndSend("/topic/chat" + message.getRoomNo(), message);
 
@@ -149,13 +151,16 @@ public class ChatServiceImpl implements ChatService{
         chatMessageRepository.deleteById(dto.getNo());
     }
 
+
+
     /**
      * 채팅 메세지 수정
      * @param dto ChatMessageDto 수정하려는 메세지 정보가 담긴 dto
      * @return ChatMessageDto 수정된 메세지 정보가 담긴 dto
+     * @throws NotFoundException 수정하려는 메세지 번호가 존재하지 않을 때 발생하는 에러
      */
     @Override
-    public ChatMessageDto updateMessage(ChatMessageDto dto) {
+    public ChatMessageDto updateMessage(ChatMessageDto dto) throws NotFoundException {
         ChatMessage chatMessage = chatMessageRepository.findById(dto.getNo()).orElseThrow(() -> new NotFoundException("해당 하는 메세지가 존재하지 않습니다."));
 
         chatMessage.setMessage(dto.getMessage());
