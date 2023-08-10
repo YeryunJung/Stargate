@@ -1,12 +1,10 @@
-package com.ssafy.stargate.model.dto.response;
+package com.ssafy.stargate.model.dto.response.dashboard;
 
-import com.ssafy.stargate.model.dto.common.MeetingDto;
-import jakarta.persistence.Entity;
 import java.util.List;
 import lombok.*;
 
 /**
- * 대시보드 dto
+ * 대시보드 응답에 관한 dto
  */
 @Builder
 @Getter

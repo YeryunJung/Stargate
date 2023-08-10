@@ -1,11 +1,12 @@
-package com.ssafy.stargate.model.dto.response;
+package com.ssafy.stargate.model.dto.response.chat;
+
 
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 /**
- * 채팅룸 (생성, 수정, 조회) 사용되는 dto
+ * 메세지 정보가 담긴 응답 dto
  */
 @Builder
 @Getter
@@ -13,10 +14,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ChattingRoomResponseDto {
+public class ChatMessageResponseDto {
 
     private Long roomNo;
-    private String roomName;
+    private String writer;
+    private String message;
+    private Long no;
     private LocalDateTime createDate;
     private LocalDateTime editDate;
 }
+
+
