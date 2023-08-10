@@ -1,9 +1,9 @@
 package com.ssafy.stargate.model.service;
 
 import com.ssafy.stargate.exception.NotFoundException;
-import com.ssafy.stargate.model.dto.common.SavedFileDto;
 import com.ssafy.stargate.model.dto.response.dashboard.DashboardMeetingResponseDto;
 import com.ssafy.stargate.model.dto.response.dashboard.DashboardResponseDto;
+import com.ssafy.stargate.model.dto.response.file.SavedFileResponseDto;
 import com.ssafy.stargate.model.entity.Meeting;
 import com.ssafy.stargate.model.entity.MeetingFUserBridge;
 import com.ssafy.stargate.model.repository.MeetingFUserRepository;
@@ -175,14 +175,14 @@ public class DashboardServiceImpl implements DashboardService{
 
         if(meeting.getImage() != null){
 
-            SavedFileDto savedFileDto = fileUtil.getFileInfo(filePath, meeting.getImage());
+            SavedFileResponseDto savedFileResponseDto = fileUtil.getFileInfo(filePath, meeting.getImage());
 
             return DashboardMeetingResponseDto.builder()
                     .uuid(meeting.getUuid())
                     .name(meeting.getName())
                     .startDate(meeting.getStartDate())
                     .remainingTime(remainingSecond)
-                    .imageFileInfo(savedFileDto)
+                    .imageFileInfo(savedFileResponseDto)
                     .build();
 
         }else{
