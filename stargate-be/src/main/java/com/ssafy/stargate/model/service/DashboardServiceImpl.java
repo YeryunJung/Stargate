@@ -13,6 +13,7 @@ import com.ssafy.stargate.util.TimeUtil;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -75,19 +76,13 @@ public class DashboardServiceImpl implements DashboardService{
     @Transactional
     public DashboardResponseDto getDashBoard() throws NotFoundException{
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-
-        Authentication authentication = securityContext.getAuthentication();
-
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = (UsernamePasswordAuthenticationToken) authentication;
-
         ongoingMeetings = new ArrayList<>();
         expectedMeetings = new ArrayList<>();
         finishedMeetings = new ArrayList<>();
         today = LocalDateTime.now();
 
-        String auth = usernamePasswordAuthenticationToken.getAuthorities().stream().toList().get(0).getAuthority().toString();
-        String email = usernamePasswordAuthenticationToken.getName().toString();
+        String auth = getAuthorizationType();
+        String email = getEmail();
 
         log.info("auth {} ", auth);
         log.info("email {} ", email);
@@ -117,6 +112,11 @@ public class DashboardServiceImpl implements DashboardService{
         }else{
             throw new NotFoundException("해당하는 AUTH 는 유효하지 않습니다.");
         }
+
+        
+        // 예정은 가장 빠른 미팅 순으로 정렬
+        // 리마인드는 가장 최근 미팅 순으로 정렬
+
         return DashboardResponseDto.builder()
                 .ongoing(ongoingMeetings)
                 .expected(expectedMeetings)
@@ -136,7 +136,6 @@ public class DashboardServiceImpl implements DashboardService{
      */
     private void classifyMeetings(Meeting meeting){
 
-        
         if(meeting != null){
 
             long remainingSecond = timeUtil.getRemaingSeconds(meeting.getStartDate());
@@ -170,7 +169,6 @@ public class DashboardServiceImpl implements DashboardService{
      */
     private DashboardMeetingResponseDto setMeetingInfo(Meeting meeting, long remainingSecond){
 
-
         log.info("초 : {}",remainingSecond);
 
         if(meeting.getImage() != null){
@@ -195,4 +193,37 @@ public class DashboardServiceImpl implements DashboardService{
                     .build();
         }
     }
+
+    /**
+     * SecurityContext 에 저장되어 있는 UsernamePasswordAuthenticationToken 정보 반환
+     * @return UsernamePasswordAuthenticationToken
+     */
+    private UsernamePasswordAuthenticationToken getUserPasswordAuthentication(){
+
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = (UsernamePasswordAuthenticationToken) authentication;
+
+        return usernamePasswordAuthenticationToken;
+    }
+
+    /**
+     * SecurityContext 에 저장되어 있는 auth 반환 
+     * @return String (USER, PRODUCER)
+     */
+    private String getAuthorizationType(){
+
+        return getUserPasswordAuthentication().getAuthorities().stream().toList().get(0).getAuthority().toString();
+    }
+
+    /**
+     * SecurityContext 에 저장되어 있는 유저 이메일 반환
+     * @return String 유저 이메일
+     */
+    private String getEmail(){
+
+        return getUserPasswordAuthentication().getName().toString();
+    }
+
 }
