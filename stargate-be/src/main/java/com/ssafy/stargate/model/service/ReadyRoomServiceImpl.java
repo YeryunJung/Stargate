@@ -8,7 +8,6 @@ import com.ssafy.stargate.model.dto.response.file.SavedFileResponseDto;
 import com.ssafy.stargate.model.dto.response.readyroom.ReadyRoomResponseDto;
 import com.ssafy.stargate.model.entity.*;
 import com.ssafy.stargate.model.repository.*;
-import com.ssafy.stargate.util.DataUtil;
 import com.ssafy.stargate.util.FileUtil;
 import com.ssafy.stargate.util.TimeUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -55,8 +54,6 @@ public class ReadyRoomServiceImpl implements ReadyRoomService {
 
     private final TimeUtil timeUtil;
 
-    private final DataUtil dataUtil;
-
     public ReadyRoomServiceImpl(
             MemoRepository memoRepository,
             MeetingRepository meetingRepository,
@@ -67,8 +64,7 @@ public class ReadyRoomServiceImpl implements ReadyRoomService {
             PostitRepository postitRepository,
             FileUtil fileUtil,
             @Value("${s3.filepath.meeting}") String filePath,
-            TimeUtil timeUtil,
-            DataUtil dataUtil) {
+            TimeUtil timeUtil) {
         this.memoRepository = memoRepository;
         this.meetingRepository = meetingRepository;
         this.meetingFUserRepository = meetingFUserRepository;
@@ -79,7 +75,6 @@ public class ReadyRoomServiceImpl implements ReadyRoomService {
         this.fileUtil = fileUtil;
         this.filePath = filePath;
         this.timeUtil = timeUtil;
-        this.dataUtil = dataUtil;
     }
 
     /**
@@ -207,11 +202,10 @@ public class ReadyRoomServiceImpl implements ReadyRoomService {
                     .memberNo(member.getMemberNo())
                     .name(member.getName())
                     .orderNum(meetingMember.getOrderNum())
-                    .roomId(MeetingMemberBridge.getRoomId(meeting, meetingMember));
-
-            PolaroidEnable polaroidEnable = polaroidEnableRepository.findById(PolaroidEnable.createId(uuid, email, memberNo)).orElse(null);
-            meetingMemberBuilder
-                    .isPolaroidEnable(dataUtil.stringToBoolean((polaroidEnable != null) ? polaroidEnable.getIsPolaroidEnable() : null));
+                    .roomId(MeetingMemberBridge.getRoomId(meeting, meetingMember))
+                    .isPolaroidEnable(Boolean.valueOf(polaroidEnableRepository.findById(PolaroidEnable.createId(uuid, email, memberNo))
+                            .orElse(PolaroidEnable.builder().isPolaroidEnable("false").build())
+                            .getIsPolaroidEnable()));
 
             Postit postit = postitRepository.findPostit(email, memberNo, uuid).orElse(null);
             if (postit != null) {
@@ -295,7 +289,7 @@ public class ReadyRoomServiceImpl implements ReadyRoomService {
     private void createPolaroidEnable(String id, PolaroidEnableWriteRequsetDto.MeetingMemberDto dto) {
         PolaroidEnable polaroidEnable = PolaroidEnable.builder()
                 .id(id)
-                .isPolaroidEnable(dataUtil.booleanToString(dto.getIsPolaroidEnable()))
+                .isPolaroidEnable(String.valueOf(dto.getIsPolaroidEnable()))
                 .build();
         polaroidEnableRepository.save(polaroidEnable);
     }
@@ -307,7 +301,7 @@ public class ReadyRoomServiceImpl implements ReadyRoomService {
      * @param dto            [PolaroidEnableDto.MeetingMemberDto] 해당 멤버의 폴라로이드 활성화 여부 정보를 담은 dto
      */
     private void updatePolaroidEnable(PolaroidEnable polaroidEnable, PolaroidEnableWriteRequsetDto.MeetingMemberDto dto) {
-        polaroidEnable.setIsPolaroidEnable(dataUtil.booleanToString(dto.getIsPolaroidEnable()));
+        polaroidEnable.setIsPolaroidEnable(String.valueOf(dto.getIsPolaroidEnable()));
         polaroidEnableRepository.save(polaroidEnable);
     }
 
