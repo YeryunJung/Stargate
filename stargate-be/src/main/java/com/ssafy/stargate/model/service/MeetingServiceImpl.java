@@ -1,6 +1,5 @@
 package com.ssafy.stargate.model.service;
 
-import com.ssafy.stargate.exception.InputDataBlankException;
 import com.ssafy.stargate.exception.InputDataDuplicationException;
 import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.exception.CRUDException;
@@ -121,7 +120,7 @@ public class MeetingServiceImpl implements MeetingService {
      */
     @Transactional
     @Override
-    public MeetingResponseDto createMeeting(MeetingCreateRequestDto dto, MultipartFile imageFile, Principal principal) throws CRUDException, InputDataBlankException {
+    public MeetingResponseDto createMeeting(MeetingCreateRequestDto dto, MultipartFile imageFile, Principal principal) throws CRUDException, NotFoundException {
         log.info("data : {}", dto);
         String email = principal.getName();
 
@@ -151,8 +150,6 @@ public class MeetingServiceImpl implements MeetingService {
 
             meetingRepository.save(meeting);
             return MeetingResponseDto.entityToDto(meeting);
-        } catch (InputDataBlankException inputDataBlankException) {
-            throw inputDataBlankException; // 그대로 던져주기
         } catch (Exception e) {
             e.printStackTrace();
             fileUtil.deleteFile(filePath, filename);
@@ -172,7 +169,7 @@ public class MeetingServiceImpl implements MeetingService {
      */
     @Transactional
     @Override
-    public void updateMeeting(MeetingUpdateRequestDto dto, MultipartFile imageFile, Principal principal) throws CRUDException, InputDataBlankException {
+    public void updateMeeting(MeetingUpdateRequestDto dto, MultipartFile imageFile, Principal principal) throws CRUDException, NotFoundException {
         log.info("data : {}", dto);
         String email = principal.getName();
 
@@ -200,8 +197,6 @@ public class MeetingServiceImpl implements MeetingService {
             updateMeetingFUserList(meetingFUsers, newMeetingFUsers);
 
             fileUtil.deleteFile(filePath, filename);
-        }  catch (InputDataBlankException inputDataBlankException) {
-            throw inputDataBlankException; // 그대로 던져주기
         } catch (Exception e) {
             e.printStackTrace();
             fileUtil.deleteFile(filePath, newFilename);
@@ -259,7 +254,7 @@ public class MeetingServiceImpl implements MeetingService {
      * @return [List<MeetingDetailResponseDto.MeetingMember>] 미팅 멤버 상세 정보 DTO 리스트
      */
     private List<MeetingDetailResponseDto.MeetingMember> getMeetingDetailMemberDtoList(Meeting meeting) {
-        return meeting.getMeetingMembers()
+        return (List<MeetingDetailResponseDto.MeetingMember>) meeting.getMeetingMembers()
                 .stream()
                 .map(meetingMember -> MeetingDetailResponseDto.MeetingMember.builder()
                         .uuid(meetingMember.getUuid())
@@ -329,10 +324,7 @@ public class MeetingServiceImpl implements MeetingService {
      * @throws NotFoundException             NotFoundException 데이터 찾기 실패 에러
      * @throws InputDataDuplicationException 미팅 멤버 리스트에 번호(id) 중복 발생 시 던져주는 에러
      */
-    private List<MeetingMemberBridge> dtoToMeetingMemberList(Meeting meeting, List<Long> meetingMemberDtos) throws NotFoundException, InputDataDuplicationException, InputDataBlankException {
-        if (meetingMemberDtos.size() < 1) {
-            throw new InputDataBlankException("미팅 멤버는 1명 이상이어야합니다.");
-        }
+    private List<MeetingMemberBridge> dtoToMeetingMemberList(Meeting meeting, List<Long> meetingMemberDtos) throws NotFoundException, InputDataDuplicationException {
         Set<Long> uniqueMemberNos = new HashSet<>();
         return IntStream.range(0, meetingMemberDtos.size())
                 .mapToObj(index -> {
@@ -360,11 +352,7 @@ public class MeetingServiceImpl implements MeetingService {
      * @return List<MeetingFUserBridge> 미팅 팬유저 엔티티 리스트
      * @throws InputDataDuplicationException 미팅 팬유저 리스트에 이메일(id) 중복 발생 시 던져주는 에러
      */
-    private List<MeetingFUserBridge> dtoToMeetingFUserList(Meeting meeting, List<String> meetingFUserDtos) throws InputDataDuplicationException, InputDataBlankException {
-        if (meetingFUserDtos.size() < 1) {
-            throw new InputDataBlankException("미팅 유저는 1명 이상이어야합니다.");
-        }
-
+    private List<MeetingFUserBridge> dtoToMeetingFUserList(Meeting meeting, List<String> meetingFUserDtos) throws InputDataDuplicationException {
         Set<String> uniqueEmails = new HashSet<>();
         return IntStream.range(0, meetingFUserDtos.size())
                 .mapToObj(index -> {
