@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,7 +116,9 @@ public class DashboardServiceImpl implements DashboardService{
 
         
         // 예정은 가장 빠른 미팅 순으로 정렬
+        sortExpectedMeetings(expectedMeetings);
         // 리마인드는 가장 최근 미팅 순으로 정렬
+        sortFinishedMeetings(finishedMeetings);
 
         return DashboardResponseDto.builder()
                 .ongoing(ongoingMeetings)
@@ -138,7 +141,7 @@ public class DashboardServiceImpl implements DashboardService{
 
         if(meeting != null){
 
-            long remainingSecond = timeUtil.getRemaingSeconds(meeting.getStartDate());
+            long remainingSecond = timeUtil.getRemainingSeconds(meeting.getStartDate());
             long totalMeetingTime = (meeting.getMeetingTime() + meeting.getWaitingTime()) * meetingFUserRepository.countRegisteredFUsers(meeting.getUuid());
 
             if(remainingSecond> 0){
@@ -171,27 +174,18 @@ public class DashboardServiceImpl implements DashboardService{
 
         log.info("초 : {}",remainingSecond);
 
+        DashboardMeetingResponseDto.DashboardMeetingResponseDtoBuilder dtoBuilder = DashboardMeetingResponseDto.builder()
+                .uuid(meeting.getUuid())
+                .name(meeting.getName())
+                .startDate(meeting.getStartDate())
+                .remainingTime(remainingSecond);
+
         if(meeting.getImage() != null){
-
             SavedFileResponseDto savedFileResponseDto = fileUtil.getFileInfo(filePath, meeting.getImage());
-
-            return DashboardMeetingResponseDto.builder()
-                    .uuid(meeting.getUuid())
-                    .name(meeting.getName())
-                    .startDate(meeting.getStartDate())
-                    .remainingTime(remainingSecond)
-                    .imageFileInfo(savedFileResponseDto)
-                    .build();
-
-        }else{
-
-            return DashboardMeetingResponseDto.builder()
-                    .uuid(meeting.getUuid())
-                    .name(meeting.getName())
-                    .startDate(meeting.getStartDate())
-                    .remainingTime(remainingSecond)
-                    .build();
+            dtoBuilder.imageFileInfo(savedFileResponseDto);
         }
+
+        return dtoBuilder.build();
     }
 
     /**
@@ -209,7 +203,7 @@ public class DashboardServiceImpl implements DashboardService{
     }
 
     /**
-     * SecurityContext 에 저장되어 있는 auth 반환 
+     * UsernamePasswordAuthenticationToken 에 저장되어 있는 auth 반환
      * @return String (USER, PRODUCER)
      */
     private String getAuthorizationType(){
@@ -218,12 +212,31 @@ public class DashboardServiceImpl implements DashboardService{
     }
 
     /**
-     * SecurityContext 에 저장되어 있는 유저 이메일 반환
+     * UsernamePasswordAuthenticationToken 에 저장되어 있는 유저 이메일 반환
      * @return String 유저 이메일
      */
     private String getEmail(){
 
         return getUserPasswordAuthentication().getName().toString();
+    }
+
+    /**
+     * 예정 미팅을 가장 시간이 얼마 남지 않은 순으로 정렬
+     * @param dto List<DashboardMeetingResponseDto> 예정 미팅 목록
+     * @return 가장 빠르게 시작하는 순으로 정렬된 예정 미팅 목록
+     */
+    private void sortExpectedMeetings(List<DashboardMeetingResponseDto> dto){
+
+        dto.stream().sorted(Comparator.comparingLong(DashboardMeetingResponseDto -> DashboardMeetingResponseDto.getRemainingTime())).toList();
+    }
+
+    /**
+     * 완료된 미팅을 가장 최근에 끝난 미팅 순으로 정렬
+     * @param dto List<DashboardMeetingResponseDto> 완료된 미팅 목록
+     * @return 가장 최근에 끝난 미팅 순으로 정렬된 완료된 미팅 목록
+     */
+    private void sortFinishedMeetings(List<DashboardMeetingResponseDto> dto){
+        dto.stream().sorted(Comparator.comparingLong(DashboardMeetingResponseDto::getRemainingTime).reversed()).collect(Collectors.toList());
     }
 
 }
