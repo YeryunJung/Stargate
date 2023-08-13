@@ -16,7 +16,9 @@ public class TimeUtil {
      * @param date 기준 날짜 
      * @return 기준일 - 현재 시간을 초로 반환
      */
-    public long getRemaingSeconds(LocalDateTime date){
+    public long getRemainingSeconds(LocalDateTime date){
+
+        log.info(" DB 에 저장된 시간 : {}, " , date);
 
         long remainingTimeMilli = date.atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli() -LocalDateTime.now().atZone(ZoneId.of("Asia/Seoul")).toInstant().toEpochMilli();
         

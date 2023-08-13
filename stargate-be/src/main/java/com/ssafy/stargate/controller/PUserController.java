@@ -2,6 +2,7 @@ package com.ssafy.stargate.controller;
 
 import com.ssafy.stargate.exception.EmailDuplicationException;
 import com.ssafy.stargate.exception.LoginException;
+import com.ssafy.stargate.exception.NotFoundException;
 import com.ssafy.stargate.exception.RegisterException;
 import com.ssafy.stargate.model.dto.request.puser.PUserCreateRequestDto;
 import com.ssafy.stargate.model.dto.request.puser.PUserDeleteRequestDto;
@@ -68,6 +69,7 @@ public class PUserController {
         try {
             return ResponseEntity.ok(pUserService.login(dto));
         } catch (LoginException e) {
+            log.info("PUSER LOGIN ERROR : {}",e.getMessage());
             return ResponseEntity.status(401).build();
         }
     }
@@ -107,6 +109,12 @@ public class PUserController {
     public ResponseEntity<?> updatePUser(@ModelAttribute PUserUpdateRequestDto pUserDto) {
         int statusCode = pUserService.updatePUser(pUserDto);
         return ResponseEntity.status(statusCode).build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(Principal principal) throws NotFoundException {
+        pUserService.logout(principal.getName());
+        return ResponseEntity.ok(null);
     }
 
 }
